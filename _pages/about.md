@@ -2,24 +2,34 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Motto. Etc.
+subtitle: Postdoc @ the University of Wuerzburg, PhD in Physics from Peking University
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: photo5.jpg
   image_circular: false # crops the image to make it circular
-  more_info: >
-    <p>555 your office number</p>
-    <p>123 your address street</p>
-    <p>Your City, State 12345</p>
 
-news: true # includes a list of news items
-selected_papers: true # includes a list of papers marked as "selected={true}"
-social: true # includes social icons at the bottom of the page
+news: false  # includes a list of news items
+latest_posts: true  # includes a list of the newest posts
+selected_papers: false # includes a list of papers marked as "selected={true}"
+social: true  # includes social icons at the bottom of the page
 ---
 
-this is my about page.Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
+I am a researcher, working on quantum transport at Wuerzburg University, Germany. My interest lies at the intersection 
+of physics, math, and software and a bit electronics.
 
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
+I received my PhD in Physics at Peking University. I completed my undergraduate study 3-year in Physics and one-year 
+in computer science at Northwest University (Xi'an). 
 
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them.
+My research has focused on novel phenomena in solid-state physics, like topological insulators, Dirac semimetals,etc.
+
+
+During my research and spare time, I am passionate with writing software for multiple reasons: 
+1. to implement mathematical algorithm to solve complex problems ([counterflow](https://github.com/LarsonLaugh/Counterfusion))
+2. to power programmable hardware (Ardurio, Pi Pico) to build fun toy ([pidML](https://github.com/LarsonLaugh/pidML))
+3. to simulate a real physical system to assist the understanding of experimental obsesrvations ([toyband](https://github.com/LarsonLaugh/toyband)),
+4. to facilitate data handling and analysis ([SciData](https://github.com/LarsonLaugh/Scientific-data))
+5. to assist my research ([arXivEng](https://github.com/LarsonLaugh/arXivEng)), study ([personalLib](https://github.com/LarsonLaugh/personalLibrary)) and 
+   stock investment ([stocksync](https://github.com/LarsonLaugh/stocksync)) 
+
+
