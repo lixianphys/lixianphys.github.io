@@ -1,3 +1,0 @@
-User-agent: *
-Disallow:
-Sitemap: https://lixianphys.github.io/sitemap.xml
