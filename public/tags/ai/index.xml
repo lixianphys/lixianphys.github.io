@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Ai on Lx&#39;Log</title>
+    <link>https://lixianphys.github.io/tags/ai/</link>
+    <description>Recent content in Ai on Lx&#39;Log</description>
+    <image>
+      <title>Lx&#39;Log</title>
+      <url>https://lixianphys.github.io/assets/images/.png</url>
+      <link>https://lixianphys.github.io/assets/images/.png</link>
+    </image>
+    <generator>Hugo -- 0.138.0</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 15 Oct 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://lixianphys.github.io/tags/ai/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Brain Cancer Diagnosis by Artificial Intelligence</title>
+      <link>https://lixianphys.github.io/posts/mrimaster/</link>
+      <pubDate>Tue, 15 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>https://lixianphys.github.io/posts/mrimaster/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;h3 id=&#34;mri-technologies&#34;&gt;MRI Technologies&lt;/h3&gt;
+&lt;p&gt;Magnetic Resonance Imaging (MRI) is a non-invasive imaging technique widely used in diagnosing various medical conditions, especially when it comes to examining soft tissues like the brain. MRI uses strong magnetic fields and radio waves to create detailed images of the body&amp;rsquo;s internal structures. This level of detail is crucial for identifying abnormalities, such as tumors, and has become a cornerstone in the diagnosis and monitoring of brain cancers.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
