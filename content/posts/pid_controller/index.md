@@ -1,19 +1,13 @@
 ---
 author: ["Lixian Wang"]
-title: How to Turn My Kettle into a Sous Vide Cooker 
-tags: ["physics", "programming"]
-categories: ["physics", "algorithm", "programming", "microcontroller"]
+title: Turn My old Kettle into a Sous Vide Cooker 
+tags: ["PID control", "Genetic algorithm","Arduino","Raspberry Pi"]
+categories: ["physics", "algorithm", "microcontroller","fun"]
 date: "2022-12-12"
-summary: "This blog serves as a memorial for the project titled 
-to keep notes of why i started and what i learned from it"
-description: "This blog serves as a memorial for the project titled  
-to keep notes of why i started and what i learned from it"
 ShowToc: true
 TocOpen: true
+draft: false
 ---
-
-
-This blog serves as a memorial for the project titled ["A genetic-algorithm optimized PID controller"](/projects/4_project/) to keep notes of why i started and what i learned from it.
 
 ## Background and Motivation
 I came across an advert for [Sous vide cooker](https://anovaculinary.com/pages/what-is-sous-vide), which is popular for preparing juicy steak. I happened to have an electronic kettle to be replaced. Not very happy with its condition, and a new one was already in my shopping list. Bingo! A natural idea came to me that this kettle can be repurposed to mimic what a Sous vide cooker could do - maintaining a fixed temperature of a body of water for a relatively long time.  I knew immediately that this requires a good PID controller just like what I have in a cryostat for stabilizing the sample chamber temperature slightly above the absolute zero. As one may know, the brain of the PID controller is a simple feedback loop governed by three parameters: proportional gain (P), integral gain (I) and derivative gain (D). In practice, in a narrow range of goal temperature, these parameters do not need to be dynamically adapted to a different goal if the external environment is stable. However, it is not guaranteed to always achieve the best stabilization for a wide range of goal temperature for the same set of parameters. That means these parameters also need to be changed if the goal temperature varies. On top of the PID feedback loop, we also need to add another layer of feedback loop to optimize parameters P, I and D.  Then the genetic algorithm seems to be useful here for generating the best choice of parameters.
@@ -37,9 +31,8 @@ if measured (actual) temperature < the goal temperature:
 else:
 	turn off the heater
 ```
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/idea0.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
+{{< figure src="images/idea0.jpg" align=center >}}
+
 It is the most intuitive approach but not practical at all in achieving stabilization due to overshooting the temperature and a lack of mechanism to balance this out. 
 
 - Idea1 (with a PID controller configured with a fixed set of parameters):
@@ -55,9 +48,8 @@ else:
 	turn off the heater
 ```
 The PID controller will determine when to turn off and on the heater. However, we need to manually set the PID parameters Kp, Ki, Kd according to prior knowledge.
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/idea1.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
+
+{{< figure src="images/idea1.jpg" align=center >}}
 
 - Idea2 (Train the genetic algorithm in actual data):
 We use the genetic algorithm to predict the best parameters for a goal temperature. 
@@ -71,9 +63,8 @@ Heat transfer can take place in four different ways : [Advection, thermal conduc
 According to Fourier's law: heater transfer per $meter^2/sec$ = - thermal conductivity * gradient of temperature ~ 540 $Watt/meter^2$. The surface area of the kettle is estimated to be about 700 $cm^2$. Then the rate of heat dissipation is thus 37.8 W. The thermal conductivity of air is about [**27 mW/m K**](https://www.engineeringtoolbox.com/air-properties-viscosity-conductivity-heat-capacity-d_1509.html). The heater power is 1000 Watt according to its manufacturer. Here is my sketch to illustrate the idea and some necessary math along the way:
 By knowing the heat capacity of water to be [**4.184 Joule/gram/deg**](https://www.engineeringtoolbox.com/specific-heat-capacity-water-d_660.html) and 0.8L (800 gram) water inside, we can estimate that the temperature goes up at a rate of **0.3 deg/sec** when the heater is on and decreases at a rate of **0.012 deg/sec** when the heater is off. Note that this estimate is not a function of temperature. So far, we have finished the physical modeling part.
 
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/physmodeling.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
+{{< figure src="images/physmodeling.jpg" align=center >}}
+
 
 ### Training Process of the Genetic Algorithm
 In the training process, the simulated temperature is programmed to goes up by 0.32 degree in each heating cycle and decreases by 0.012 degree in each natural cooling cycle according to the results of physical modelling by assuming 1 cycle = 1 second. 
@@ -97,19 +88,13 @@ def pid_hybrid(pid1, pid2):
 def pid_mutation():
     return 100 * random_sample(3)
 ```
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/GAlgo.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
+
+{{< figure src="images/GAlgo.jpg" align=center >}}
 
 Starting from the 99th generation (iteration), we find that all winners' descendants collapse in a smaller volume in (Kp, Ki, Kd) parameter space. That means the model has already been trained or optimized, thus ends the optimization process. 
-<div class="row mt-3">
-  <div class="col-sm mt-3 mt-md-0">
-      {% include figure.html path="assets/img/pidcontroller/scatters.png" class="img-fluid rounded z-depth-1" zoomable=true %}
-  </div>
-  <div class="col-sm mt-3 mt-md-0">
-      {% include figure.html path="assets/img/pidcontroller/scatters02.png" class="img-fluid rounded z-depth-1" zoomable=true %}
-  </div>
-</div>
+{{< figure src="images/scatters.png" align=center >}}
+{{< figure src="images/scatters02.png" align=center >}}
+
 ### Hardware components and wiring
 
 | Functional parts  | Models                          |
@@ -120,9 +105,9 @@ Starting from the 99th generation (iteration), we find that all winners' descend
 | User interface    | ICD 1602                        |
 | User input        | rotary potentiometer            |
 
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/sketch_ArduinoNano.png" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
+
+{{< figure src="images/sketch_ArduinoNano.png" align=center >}}
+
 
 ### Software
 The source code of this open-source project is hosted by [Github](https://github.com/LarsonLaugh/pidML)
@@ -134,44 +119,22 @@ The `Micropython` code for microcontroller unit (MCU) is stored in `mpython` fol
 
 ### User Interface Design for the Microcontroller
 The LCD is only 16 by 2, so we have to fully exploit the limited screen space and the switch button of the rotary potentiometer.
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/ui_screen0.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
-<div class="caption">
-   screen 0
-</div>
+{{< figure src="images/ui_screen0.jpg" align=center title="Set and Monitor Screen" >}}
+
 This is the main screen to display setting temperature and reading. Press button to go next.
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/ui_screen1.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
-<div class="caption">
-   screen 1
-</div>
+{{< figure src="images/ui_screen1.jpg" align=center title="PID Output" >}}
+
 This is the second screen (`screen1`) to monitor the PID paramters in use and the calculated output value 
 in real time. Press button to go next and roll to the left to go back to `screen0`.
-<div class="row mt-3">
-  <div class="col-sm mt-3 mt-md-0">
-      {% include figure.html path="assets/img/pidcontroller/ui_screen2.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-  </div>
-  <div class="col-sm mt-3 mt-md-0">
-      {% include figure.html path="assets/img/pidcontroller/ui_screen3.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-  </div>
-  <div class="col-sm mt-3 mt-md-0">
-      {% include figure.html path="assets/img/pidcontroller/ui_screen4.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-  </div>
-</div>
-<div class="caption">
-   From left to right, screen 2, screen 3, screen 4
-</div>
+{{< figure src="images/ui_screen2.jpg" align=center title="Set P Value" >}}
+{{< figure src="images/ui_screen3.jpg" align=center title="Set I Value" >}}
+{{< figure src="images/ui_screen4.jpg" align=center title="Set D Value" >}}
+
 Above three screens (`screen2` to `screen4`) to modify the PID parameters one by one manually. Use the 
 rotary potentiometer. Press button to go next.
 
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/ui_screen5.jpg" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
-<div class="caption">
-   screen 5
-</div>
+{{< figure src="images/ui_screen5.jpg" align=center title="Accept Manual Inputs" >}}
+
 This is the last screen `screen5`. Roll left to adapt `Auto mode` (default setting) and press button to
 accept the manually set PID parameters and go to `screen0`.
 
@@ -182,9 +145,6 @@ After training for 100 generations and a population size of 20 in each, a set of
 We configure our PID controller by this set for following experiments. Here we show the actual temperature curve (labelled as real) and the simulation result (labelled as simulation).  In the first 2000 seconds, the simulation matches quite well with the actual curve real in both trend of temperature (upper) and output (`Kp*error+Ki*integral+Kd*derivative`) of the PID system (lower). That means
 our physical model gives accurate predictions of temperature change rates used here. After 2000 seconds, the temperature in simulation stabilizes within 0.32 degree. In reality, the temperature continues to fluctuate in a much narrowed window ~ 5 degrees. This fluctuation seems to be overshooting, which may be due to the fact that the heater is still much hotter than water and continues to heat water even after being powered off. This may be the bottleneck to achieve better performance.
 
-<div class="col-sm mt-3 mt-md-0">
-    {% include figure.html path="assets/img/pidcontroller/realvssimu.png" class="img-fluid rounded z-depth-1" zoomable=true %}
-</div>
+{{< figure src="images/realvssimu.png" align=center title="Real World versus Simulation" >}}
 
-## Concluding remarks
-In the end, not surprisingly, there is still a lot to improve in many aspects for this combination of software and hardware to perform as good as a commercial cooker. For myself, it is thrilling to go through this exploration and broaden my knowledge in genetic algorithm and microcontrollers. I hope this is also some sort of entertaining for you to go with me in this journey. 
+In the end, there is still a lot to improve in many aspects for this combination of software and hardware to perform as good as a commercial cooker. For myself, it is thrilling to go through this exploration and broaden my knowledge in genetic algorithm and microcontrollers. I hope this is also some sort of entertaining for you to go with me in this journey. 

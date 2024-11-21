@@ -23,6 +23,7 @@ params:
   DateFormat: "January 2, 2006"
   defaultTheme: auto # dark, light
   disableThemeToggle: false
+  math: true
 
   ShowReadingTime: true
   ShowShareButtons: true
@@ -117,10 +118,10 @@ params:
     keys: ["title", "permalink", "summary", "content"]
 menu:
   main:
-    # - identifier: categories
-    #   name: Categories
-    #   url: /categories/
-    #   weight: 20
+    - identifier: categories
+      name: Categories
+      url: /categories/
+      weight: 50
     - identifier: tags
       name: Tags
       url: /tags/
@@ -137,6 +138,7 @@ menu:
       name: Archive
       url: /archives/
       weight: 20
+
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:
@@ -147,6 +149,21 @@ markup:
     guessSyntax: true
     # lineNos: true
     style: monokai
+    goldmark:
+      extensions:
+        passthrough:
+          delimiters:
+            block:
+            - - \[
+              - \]
+            - - $$
+              - $$
+            inline:
+            - - \(
+              - \)
+            - - $
+              - $
+          enable: true
 outputs:
   home:
     - HTML
