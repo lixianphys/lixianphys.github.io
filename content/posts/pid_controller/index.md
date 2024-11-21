@@ -9,8 +9,7 @@ TocOpen: true
 draft: false
 ---
 
-## Background and Motivation
-I came across an advert for [Sous vide cooker](https://anovaculinary.com/pages/what-is-sous-vide), which is popular for preparing juicy steak. I happened to have an electronic kettle to be replaced. Not very happy with its condition, and a new one was already in my shopping list. Bingo! A natural idea came to me that this kettle can be repurposed to mimic what a Sous vide cooker could do - maintaining a fixed temperature of a body of water for a relatively long time.  I knew immediately that this requires a good PID controller just like what I have in a cryostat for stabilizing the sample chamber temperature slightly above the absolute zero. As one may know, the brain of the PID controller is a simple feedback loop governed by three parameters: proportional gain (P), integral gain (I) and derivative gain (D). In practice, in a narrow range of goal temperature, these parameters do not need to be dynamically adapted to a different goal if the external environment is stable. However, it is not guaranteed to always achieve the best stabilization for a wide range of goal temperature for the same set of parameters. That means these parameters also need to be changed if the goal temperature varies. On top of the PID feedback loop, we also need to add another layer of feedback loop to optimize parameters P, I and D.  Then the genetic algorithm seems to be useful here for generating the best choice of parameters.
+A few days ago, I came across an advert for [Sous vide cooker](https://anovaculinary.com/pages/what-is-sous-vide), which is popular for preparing juicy steak. I happened to have an electronic kettle to be replaced. Not very happy with its condition, and a new one was already in my shopping list. Bingo! A natural idea came to me that this kettle can be repurposed to mimic what a Sous vide cooker could do - maintaining a fixed temperature of a body of water for a relatively long time.  I knew immediately that this requires a good PID controller just like what I have in a cryostat for stabilizing the sample chamber temperature slightly above the absolute zero. As one may know, the brain of the PID controller is a simple feedback loop governed by three parameters: proportional gain (P), integral gain (I) and derivative gain (D). In practice, in a narrow range of goal temperature, these parameters do not need to be dynamically adapted to a different goal if the external environment is stable. However, it is not guaranteed to always achieve the best stabilization for a wide range of goal temperature for the same set of parameters. That means these parameters also need to be changed if the goal temperature varies. On top of the PID feedback loop, we also need to add another layer of feedback loop to optimize parameters P, I and D.  Then the genetic algorithm seems to be useful here for generating the best choice of parameters.
 Here is a definition for genetic algorithm from MathWorks:
 
 > A genetic algorithm (GA) is a method for solving both constrained and unconstrained optimization problems based on a natural selection process that mimics biological evolution. The algorithm repeatedly modifies a population of individual solutions. At each step, the genetic algorithm randomly selects individuals from the current population and uses them as parents to produce the children for the next generation. Over successive generations, the population "evolves" toward an optimal solution.
@@ -60,10 +59,13 @@ Thanks to the law of physics, we can first build up a physical model in which we
 
 ### Physical Modeling
 Heat transfer can take place in four different ways : [Advection, thermal conduction, convection and radiation](https://en.wikipedia.org/wiki/Heat_transfer). Here we only consider thermal conduction as the major contributor. We also consider metallic walls of the kettle to be perfectly transparent in terms of thermal conduction. Therefore, the hot water directly interfaces the cold air outside. Then we can start to do some calculations of relevant physical properties.
-According to Fourier's law: heater transfer per $meter^2/sec$ = - thermal conductivity * gradient of temperature ~ 540 $Watt/meter^2$. The surface area of the kettle is estimated to be about 700 $cm^2$. Then the rate of heat dissipation is thus 37.8 W. The thermal conductivity of air is about [**27 mW/m K**](https://www.engineeringtoolbox.com/air-properties-viscosity-conductivity-heat-capacity-d_1509.html). The heater power is 1000 Watt according to its manufacturer. Here is my sketch to illustrate the idea and some necessary math along the way:
-By knowing the heat capacity of water to be [**4.184 Joule/gram/deg**](https://www.engineeringtoolbox.com/specific-heat-capacity-water-d_660.html) and 0.8L (800 gram) water inside, we can estimate that the temperature goes up at a rate of **0.3 deg/sec** when the heater is on and decreases at a rate of **0.012 deg/sec** when the heater is off. Note that this estimate is not a function of temperature. So far, we have finished the physical modeling part.
+According to Fourier's law: $q = -\kappa\nabla T \sim 540 W/m^2$. The surface area of the kettle is estimated to be about 700 $cm^2$. Then the rate of heat dissipation is thus 37.8 W. The thermal conductivity of air $\kappa_{a}$ is about [27 W/K](https://www.engineeringtoolbox.com/air-properties-viscosity-conductivity-heat-capacity-d_1509.html). The heating power is $1000~W$ according to manufacturer. Here is my sketch to illustrate the idea and some necessary math along the way:
 
 {{< figure src="images/physmodeling.jpg" align=center >}}
+
+By knowing the heat capacity of water to be [4.184 J/g/$^{\circ}$C ](https://www.engineeringtoolbox.com/specific-heat-capacity-water-d_660.html) and $0.8~L$ ($800~g$) water inside, we can estimate that the temperature goes up at a rate of 0.3 $^{\circ}$C/s when the heater is on and decreases at a rate of 0.012 $^{\circ}$C/s when the heater is off. Note that this estimate is not a function of temperature. So far, we have finished the physical modeling part.
+
+
 
 
 ### Training Process of the Genetic Algorithm
@@ -111,13 +113,17 @@ Starting from the 99th generation (iteration), we find that all winners' descend
 
 ### Software
 The source code of this open-source project is hosted by [Github](https://github.com/LarsonLaugh/pidML)
-#### Algorithm Training Process
+
+**Algorithm Training Process**
+
 For Python users, use `pidtrain.py` to train your PID controller in simulation. 
-For C++ users, use `pidtrain.cpp` to train your PID controller instead. C++ code is 50 times faster than its Python counterpart. .
-#### Deploy to Microcontroller
+For C++ users, use `pidtrain.cpp` to train your PID controller instead. C++ code is 50 times faster than its Python counterpart.
+
+**Deploy to Microcontroller**
+
 The `Micropython` code for microcontroller unit (MCU) is stored in `mpython` folder. Please include the libraries in `lib` as well. The Arduino code for  MCU is stored in `Arduino` folder and please include the `libraries` folder
 
-### User Interface Design for the Microcontroller
+### User Interface for the Microcontroller
 The LCD is only 16 by 2, so we have to fully exploit the limited screen space and the switch button of the rotary potentiometer.
 {{< figure src="images/ui_screen0.jpg" align=center title="Set and Monitor Screen" >}}
 
@@ -140,7 +146,7 @@ accept the manually set PID parameters and go to `screen0`.
 
 ## Performance Test
 ### Results of Algorithm Training 
-After training for 100 generations and a population size of 20 in each, a set of  parameter (Kp = 88, Ki = 4.4, Kd = 18) is the final winner for a goal temperature of 56 degree Celsius.  
+After training for 100 generations and a population size of 20 in each, a set of parameters ($K_p = 88$, $K_i = 4.4$, $K_d = 18$) is the final winner for a goal temperature of 56 degree Celsius.  
 ### Algorithm-optimized PID Controller and Its Performance
 We configure our PID controller by this set for following experiments. Here we show the actual temperature curve (labelled as real) and the simulation result (labelled as simulation).  In the first 2000 seconds, the simulation matches quite well with the actual curve real in both trend of temperature (upper) and output (`Kp*error+Ki*integral+Kd*derivative`) of the PID system (lower). That means
 our physical model gives accurate predictions of temperature change rates used here. After 2000 seconds, the temperature in simulation stabilizes within 0.32 degree. In reality, the temperature continues to fluctuate in a much narrowed window ~ 5 degrees. This fluctuation seems to be overshooting, which may be due to the fact that the heater is still much hotter than water and continues to heat water even after being powered off. This may be the bottleneck to achieve better performance.
