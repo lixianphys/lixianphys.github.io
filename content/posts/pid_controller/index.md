@@ -14,10 +14,14 @@ Here is a definition for genetic algorithm from MathWorks:
 
 > A genetic algorithm (GA) is a method for solving both constrained and unconstrained optimization problems based on a natural selection process that mimics biological evolution. The algorithm repeatedly modifies a population of individual solutions. At each step, the genetic algorithm randomly selects individuals from the current population and uses them as parents to produce the children for the next generation. Over successive generations, the population "evolves" toward an optimal solution.
 
-This experiment with genetic algorithm would at least guarantee me an enjoyable exploration if not a ready-to-use Sous vide cooker. Not too bad at the worst situation.
-Let's go on the journey.
+
 
 ## How to Implement This Idea
+
+{{< figure src="images/PID workflow.png" align=center >}}
+
+
+
 ### How to Stablize the Temperature in General
 Before moving into the actual implementation, I would like to first compare a few ideas side-by-side for stablizing 
 temperature, ranging from the most intuitive but also naive one to the less intuitive but more practical ones. 
@@ -30,7 +34,7 @@ if measured (actual) temperature < the goal temperature:
 else:
 	turn off the heater
 ```
-{{< figure src="images/idea0.jpg" align=center >}}
+{{< figure src="images/idea0.JPG" align=center >}}
 
 It is the most intuitive approach but not practical at all in achieving stabilization due to overshooting the temperature and a lack of mechanism to balance this out. 
 
@@ -48,7 +52,7 @@ else:
 ```
 The PID controller will determine when to turn off and on the heater. However, we need to manually set the PID parameters Kp, Ki, Kd according to prior knowledge.
 
-{{< figure src="images/idea1.jpg" align=center >}}
+{{< figure src="images/idea1.JPG" align=center >}}
 
 - Idea2 (Train the genetic algorithm in actual data):
 We use the genetic algorithm to predict the best parameters for a goal temperature. 
@@ -61,11 +65,9 @@ Thanks to the law of physics, we can first build up a physical model in which we
 Heat transfer can take place in four different ways : [Advection, thermal conduction, convection and radiation](https://en.wikipedia.org/wiki/Heat_transfer). Here we only consider thermal conduction as the major contributor. We also consider metallic walls of the kettle to be perfectly transparent in terms of thermal conduction. Therefore, the hot water directly interfaces the cold air outside. Then we can start to do some calculations of relevant physical properties.
 According to Fourier's law: $q = -\kappa\nabla T \sim 540 W/m^2$. The surface area of the kettle is estimated to be about 700 $cm^2$. Then the rate of heat dissipation is thus 37.8 W. The thermal conductivity of air $\kappa_{a}$ is about [27 W/K](https://www.engineeringtoolbox.com/air-properties-viscosity-conductivity-heat-capacity-d_1509.html). The heating power is $1000~W$ according to manufacturer. Here is my sketch to illustrate the idea and some necessary math along the way:
 
-{{< figure src="images/physmodeling.jpg" align=center >}}
+{{< figure src="images/physmodeling.JPG" align=center >}}
 
 By knowing the heat capacity of water to be [4.184 J/g/$^{\circ}$C ](https://www.engineeringtoolbox.com/specific-heat-capacity-water-d_660.html) and $0.8L$ ($800~g$) water inside, we can estimate that the temperature goes up at a rate of 0.3 $^{\circ}$C/s when the heater is on and decreases at a rate of 0.012 $^{\circ}$C/s when the heater is off. Note that this estimate is not a function of temperature. So far, we have finished the physical modeling part.
-
-
 
 
 ### Training Process of the Genetic Algorithm
@@ -91,7 +93,7 @@ def pid_mutation():
     return 100 * random_sample(3)
 ```
 
-{{< figure src="images/GAlgo.jpg" align=center >}}
+{{< figure src="images/GAlgo.JPG" align=center >}}
 
 Starting from the 99th generation (iteration), we find that all winners' descendants collapse in a smaller volume in (Kp, Ki, Kd) parameter space. That means the model has already been trained or optimized, thus ends the optimization process. 
 {{< figure src="images/scatters.png" align=center >}}
@@ -125,21 +127,21 @@ The `Micropython` code for microcontroller unit (MCU) is stored in `mpython` fol
 
 ### User Interface for the Microcontroller
 The LCD is only 16 by 2, so we have to fully exploit the limited screen space and the switch button of the rotary potentiometer.
-{{< figure src="images/ui_screen0.jpg" align=center title="Set and Monitor Screen" >}}
+{{< figure src="images/ui_screen0.JPG" align=center title="Set and Monitor Screen" >}}
 
 This is the main screen to display setting temperature and reading. Press button to go next.
-{{< figure src="images/ui_screen1.jpg" align=center title="PID Output" >}}
+{{< figure src="images/ui_screen1.JPG" align=center title="PID Output" >}}
 
 This is the second screen (`screen1`) to monitor the PID paramters in use and the calculated output value 
 in real time. Press button to go next and roll to the left to go back to `screen0`.
-{{< figure src="images/ui_screen2.jpg" align=center title="Set P Value" >}}
-{{< figure src="images/ui_screen3.jpg" align=center title="Set I Value" >}}
-{{< figure src="images/ui_screen4.jpg" align=center title="Set D Value" >}}
+{{< figure src="images/ui_screen2.JPG" align=center title="Set P Value" >}}
+{{< figure src="images/ui_screen3.JPG" align=center title="Set I Value" >}}
+{{< figure src="images/ui_screen4.JPG" align=center title="Set D Value" >}}
 
 Above three screens (`screen2` to `screen4`) to modify the PID parameters one by one manually. Use the 
 rotary potentiometer. Press button to go next.
 
-{{< figure src="images/ui_screen5.jpg" align=center title="Accept Manual Inputs" >}}
+{{< figure src="images/ui_screen5.JPG" align=center title="Accept Manual Inputs" >}}
 
 This is the last screen `screen5`. Roll left to adapt `Auto mode` (default setting) and press button to
 accept the manually set PID parameters and go to `screen0`.
