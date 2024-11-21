@@ -63,7 +63,7 @@ According to Fourier's law: $q = -\kappa\nabla T \sim 540 W/m^2$. The surface ar
 
 {{< figure src="images/physmodeling.jpg" align=center >}}
 
-By knowing the heat capacity of water to be [4.184 J/g/$^{\circ}$C ](https://www.engineeringtoolbox.com/specific-heat-capacity-water-d_660.html) and $0.8~L$ ($800~g$) water inside, we can estimate that the temperature goes up at a rate of 0.3 $^{\circ}$C/s when the heater is on and decreases at a rate of 0.012 $^{\circ}$C/s when the heater is off. Note that this estimate is not a function of temperature. So far, we have finished the physical modeling part.
+By knowing the heat capacity of water to be [4.184 J/g/$^{\circ}$C ](https://www.engineeringtoolbox.com/specific-heat-capacity-water-d_660.html) and $0.8L$ ($800~g$) water inside, we can estimate that the temperature goes up at a rate of 0.3 $^{\circ}$C/s when the heater is on and decreases at a rate of 0.012 $^{\circ}$C/s when the heater is off. Note that this estimate is not a function of temperature. So far, we have finished the physical modeling part.
 
 
 
