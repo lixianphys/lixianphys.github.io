@@ -173,6 +173,6 @@ outputs:
     - RSS
     - JSON # necessary for search
 
-services:
-  googleAnalytics:
-    id: G-T7D15XF072
+# services:
+#   googleAnalytics:
+#     id: G-T7D15XF072
