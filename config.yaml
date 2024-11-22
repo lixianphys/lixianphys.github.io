@@ -175,4 +175,4 @@ outputs:
 
 services:
   googleAnalytics:
-    ID: G-T7D15XF072
+    id: G-T7D15XF072
