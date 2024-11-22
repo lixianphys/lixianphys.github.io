@@ -1,5 +1,5 @@
 baseURL: "https://lixianphys.github.io/"
-title: Lx'Log
+title: Lixian Wang
 paginate: 5
 theme: [PaperMod]
 
@@ -51,7 +51,7 @@ params:
     # safari_pinned_tab: "<link / abs url>"
 
   label:
-    text: "Lx'Log"
+    text: "Lixian Wang"
     icon: /apple-touch-icon.png
     iconHeight: 35
 
@@ -78,14 +78,17 @@ params:
 
   # home-info mode
   homeInfoParams:
-    Title: "\U0001F44B Welcome to Lx'Log"
-    Content: Hi, this is Lixian. I am a researcher, working on quantum transport at Wuerzburg University, Germany. My interest lies at the intersection of physics, math, and software and a bit electronics.
+    Title: "\U0001F44B Welcome"
+    Content: Hi, this is Lixian. I am documenting my open-source projects, learning notes and random thoughts in this blog. I am a physicist and Python developer. I've earned a PhD in Condensed Matter Physics from Peking University. Since 2017, I've been working on quantum transport at Wuerzburg University, Germany. Recently, I've been diving deep into computer vision, which combines my love for problem-solving and data-driven solutions.
 
+  
   socialIcons:
     - name: linkedin
       url: "https://www.linkedin.com/in/lixianphys/"
     - name: github
       url: "https://github.com/lixianphys"
+    - name: scholar
+      url: "https://scholar.google.com/citations?user=E2-0hTwAAAAJ&hl=zh-CN"
 
   analytics:
     google:
@@ -169,3 +172,7 @@ outputs:
     - HTML
     - RSS
     - JSON # necessary for search
+
+services:
+  googleAnalytics:
+    ID: G-T7D15XF072

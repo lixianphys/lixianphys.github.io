@@ -20,8 +20,6 @@ Here is a definition for genetic algorithm from MathWorks:
 
 {{< figure src="images/PID workflow.png" align=center >}}
 
-
-
 ### How to Stablize the Temperature in General
 Before moving into the actual implementation, I would like to first compare a few ideas side-by-side for stablizing 
 temperature, ranging from the most intuitive but also naive one to the less intuitive but more practical ones. 

@@ -1,7 +1,7 @@
 ---
 author: Lixian Wang
 title: A Duo Traveling Reversely 
-tags: ["quantum Hall effect", "counter-propagating flows","dynamic programming"]
+tags: ["quantum Hall effect", "counter-propagating flows","dynamic programming","algorithm"]
 categories: ["physics","computer science","linear algebra"]
 date: "2023-11-22"
 ShowToc: true
