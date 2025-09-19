@@ -1,4 +1,4 @@
-name: Deploy Hugo PaperMod Demo to Pages
+name: Deploy Lixian Phys to GitHub Pages
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
       hugoVersion:
         description: "Hugo Version"
         required: false
-        default: "0.146.0"
+        default: "0.137.1"
 
 # Allow one concurrent deployment
 concurrency:
@@ -37,7 +37,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      HUGO_VERSION: ${{ github.event.inputs.hugoVersion || '0.146.0' }}
+      HUGO_VERSION: ${{ github.event.inputs.hugoVersion || '0.137.1' }}
     steps:
       - name: Install Hugo CLI
         run: |
@@ -59,6 +59,14 @@ jobs:
           hugo \
             --gc \
             --baseURL ${{ steps.pages.outputs.base_url }}
+      - name: Debug - List public directory contents
+        run: |
+          echo "=== Public directory contents ==="
+          ls -la public/
+          echo "=== Checking for index.html ==="
+          ls -la public/index.html
+          echo "=== File size of index.html ==="
+          wc -c public/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
