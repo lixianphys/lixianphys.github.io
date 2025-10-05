@@ -79,7 +79,7 @@ jobs:
           hugo \
             --gc \
             --baseURL ${{ steps.pages.outputs.base_url }} \
-            --verbose
+            --logLevel info
       - name: Debug - Check build output
         run: |
           echo "=== Hugo build completed ==="
