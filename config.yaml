@@ -64,13 +64,13 @@ params:
   profileMode:
     enabled: true
     title: "Hey" # optional default will be site title
-    subtitle: "this is Lixian. I am Software Engineer and ex-Physicist. I am documenting my open-source projects, learning notes and random thoughts here. if you are interested in IT job market in Germany, I invite you to try this API out and give me some feedback! 🚀 [JobInT](https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/)"
+    subtitle: "this is Lixian, a Software Engineer and ex-Physicist. I am sharing my open-source projects, learning notes and random thoughts here. if you are interested in IT job market in Germany, I invite you to try this API out and give me some feedback! 🚀 [JobInT](https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/)"
     imageUrl: "apple-touch-icon.png" # optional
     imageTitle: "Lixian" # optional
     imageWidth: 120 # custom size
     imageHeight: 120 # custom size
     buttons:
-      - name: Portofolio
+      - name: Portfolio
         url: /portfolio
 
 
@@ -83,7 +83,7 @@ params:
   # home-info mode
   homeInfoParams:
     Title: "\U0001F44B Welcome"
-    Content: Hi, this is Lixian. I am Software Engineer and ex-Physicist. I am documenting my open-source projects, learning notes and random thoughts in this blog. I've built a IT job info API service and want to invite you to try it out! 🚀 [JobInT](https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/).
+    Content: this is Lixian, a Software Engineer and ex-Physicist. I am sharing my open-source projects, learning notes and random thoughts here. if you are interested in IT job market in Germany, I invite you to try this API out and give me some feedback! 🚀 [JobInT](https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/)
 
   
   socialIcons:
