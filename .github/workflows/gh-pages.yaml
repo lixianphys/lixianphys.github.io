@@ -54,11 +54,58 @@ jobs:
         run: git submodule update --init --recursive
       - name: Update theme to Latest commit
         run: git submodule update --remote --merge
+      - name: Debug - Check environment and config
+        run: |
+          echo "=== Environment Debug ==="
+          echo "Hugo version: $(hugo version)"
+          echo "Git status:"
+          git status --porcelain
+          echo "=== Config file check ==="
+          if [ -f "config.yaml" ]; then
+            echo "✅ config.yaml exists"
+            echo "BaseURL from config:"
+            grep "baseURL:" config.yaml || echo "No baseURL found in config"
+          else
+            echo "❌ config.yaml NOT FOUND"
+          fi
+          echo "=== Theme check ==="
+          ls -la themes/ || echo "No themes directory"
+          echo "=== Content check ==="
+          find content/ -name "*.md" | head -10 || echo "No content files found"
       - name: Build with Hugo
         run: |
+          echo "=== Building with Hugo ==="
+          echo "Base URL: ${{ steps.pages.outputs.base_url }}"
           hugo \
             --gc \
-            --baseURL ${{ steps.pages.outputs.base_url }}
+            --baseURL ${{ steps.pages.outputs.base_url }} \
+            --verbose
+      - name: Debug - Check build output
+        run: |
+          echo "=== Hugo build completed ==="
+          echo "=== Public directory structure ==="
+          find public/ -type f -name "*.html" | head -20
+          echo "=== Checking index.html ==="
+          if [ -f "public/index.html" ]; then
+            echo "✅ index.html exists"
+            echo "File size: $(wc -c < public/index.html) bytes"
+            echo "First 200 characters:"
+            head -c 200 public/index.html
+            echo ""
+            echo "=== Checking for localhost references ==="
+            if grep -q "localhost" public/index.html; then
+              echo "❌ Found localhost references in index.html"
+              grep -n "localhost" public/index.html | head -5
+            else
+              echo "✅ No localhost references found"
+            fi
+          else
+            echo "❌ index.html NOT FOUND"
+          fi
+          echo "=== All HTML files ==="
+          ls -la public/*.html 2>/dev/null || echo "No HTML files found"
+          echo "=== Directory listing ==="
+          ls -la public/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -71,6 +118,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Debug - Check deployment artifact
+        run: |
+          echo "=== Deployment Debug Info ==="
+          echo "GitHub Pages URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
