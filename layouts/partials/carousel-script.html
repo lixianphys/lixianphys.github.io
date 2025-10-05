@@ -1,0 +1,65 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all portfolio carousels
+    const carousels = document.querySelectorAll('.portfolio-carousel');
+    
+    carousels.forEach(carousel => {
+        const images = carousel.querySelectorAll('.carousel-image');
+        const indicators = carousel.querySelectorAll('.indicator');
+        let currentIndex = 0;
+        let autoRotateInterval;
+        
+        // Function to show specific image
+        function showImage(index) {
+            // Hide all images
+            images.forEach(img => img.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+            
+            // Show current image
+            if (images[index]) {
+                images[index].classList.add('active');
+            }
+            if (indicators[index]) {
+                indicators[index].classList.add('active');
+            }
+            
+            currentIndex = index;
+        }
+        
+        // Function to go to next image
+        function nextImage() {
+            const nextIndex = (currentIndex + 1) % images.length;
+            showImage(nextIndex);
+        }
+        
+        // Function to start auto-rotation
+        function startAutoRotate() {
+            autoRotateInterval = setInterval(nextImage, 3000); // Change every 3 seconds
+        }
+        
+        // Function to stop auto-rotation
+        function stopAutoRotate() {
+            if (autoRotateInterval) {
+                clearInterval(autoRotateInterval);
+            }
+        }
+        
+        // Add click handlers to indicators
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                showImage(index);
+                stopAutoRotate();
+                // Restart auto-rotation after 5 seconds of inactivity
+                setTimeout(startAutoRotate, 5000);
+            });
+        });
+        
+        // Pause auto-rotation on hover
+        carousel.addEventListener('mouseenter', stopAutoRotate);
+        carousel.addEventListener('mouseleave', startAutoRotate);
+        
+        // Start auto-rotation
+        startAutoRotate();
+    });
+});
+</script>

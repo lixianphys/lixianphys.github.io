@@ -21,13 +21,13 @@ params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
   title: My Blog
   description: This is a blog of mine
-  keywords: [Blog, Portfoliod]
+  keywords: [Blog, Portfolio]
   author: Lixian Wang
   # author: ["Me", "You"] # multiple authors
   images: ["assets/images/.png"]
   DateFormat: "January 2, 2006"
-  defaultTheme: auto # dark, light, auto
-  disableThemeToggle: false
+  defaultTheme: dark # dark, light, auto
+  disableThemeToggle: true
   math: true
 
   ShowReadingTime: true
@@ -63,19 +63,16 @@ params:
   # profile-mode
   profileMode:
     enabled: true
-    title: "Hallo! Hello! Nihao！" # optional default will be site title
-    subtitle: "Hi, this is Lixian. I am documenting my open-source projects, learning notes and random thoughts in this blog. I am a physicist and Python developer. I've earned a PhD in Condensed Matter Physics from Peking University. Since 2017, I've been working on quantum transport at Wuerzburg University, Germany. Recently, I've been diving deep into computer vision, which combines my love for problem-solving and data-driven solutions."
+    title: "Hey" # optional default will be site title
+    subtitle: "this is Lixian. I am Software Engineer and ex-Physicist. I am documenting my open-source projects, learning notes and random thoughts here. if you are interested in IT job market in Germany, I invite you to try this API out and give me some feedback! 🚀 [JobInT](https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/)"
     imageUrl: "apple-touch-icon.png" # optional
     imageTitle: "Lixian" # optional
     imageWidth: 120 # custom size
     imageHeight: 120 # custom size
     buttons:
-      - name: Posts
-        url: /posts
-      - name: Tags
-        url: /tags
-      - name: Archives
-        url: /archives
+      - name: Portofolio
+        url: /portfolio
+
 
   socialIcons: # optional
     - name: "<platform>"
@@ -86,7 +83,7 @@ params:
   # home-info mode
   homeInfoParams:
     Title: "\U0001F44B Welcome"
-    Content: Hi, this is Lixian. I am documenting my open-source projects, learning notes and random thoughts in this blog. I am a physicist and Python developer. I've earned a PhD in Condensed Matter Physics from Peking University. Since 2017, I've been working on quantum transport at Wuerzburg University, Germany. Recently, I've been diving deep into computer vision, which combines my love for problem-solving and data-driven solutions.
+    Content: Hi, this is Lixian. I am Software Engineer and ex-Physicist. I am documenting my open-source projects, learning notes and random thoughts in this blog. I've built a IT job info API service and want to invite you to try it out! 🚀 [JobInT](https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/).
 
   
   socialIcons:
@@ -96,6 +93,33 @@ params:
       url: "https://github.com/lixianphys"
     - name: scholar
       url: "https://scholar.google.com/citations?user=E2-0hTwAAAAJ&hl=zh-CN"
+
+  # Portfolio projects
+  portfolio:
+    - title: "JobInT - IT Job Info API"
+      description: "RESTful API service providing real-time IT job market data for Germany"
+      image: "images/portfolio/jobint-api.png"
+      technologies: ["AWS Lambda", "PostgreSQL", "FastAPI"]
+      github: "https://github.com/lixianphys/jobint-api"
+      demo: "https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/"
+      featured: true
+    - title: "MRI Image helper"
+      description: "Distributed, AI model-powered web application for image analysis"
+      images: 
+        - "images/portfolio/mrihelper-control-volume.png"
+        - "images/portfolio/mrihelper-control-segment.png"
+        - "images/portfolio/mrihelper-result-volume.png"
+        - "images/portfolio/mrihelper-result-segment.png"
+      technologies: ["Celery", "Redis", "RabbitMQ", "FastAPI", "S3", "Docker", "Kubernetes"]
+      github: "https://github.com/lixianphys/mrihelper"
+      demo: ""
+      featured: true
+    - title: "Secure Bank API"
+      description: "Production-ready RESTful API for core banking operations"
+      technologies: ["PostgreSQL", "FastAPI", "SQLAlchemy", "Pytest"]
+      github: "https://github.com/lixianphys/banking-api"
+      demo: ""
+      featured: false
 
   analytics:
     google:
@@ -128,6 +152,10 @@ params:
     keys: ["title", "permalink", "summary", "content"]
 menu:
   main:
+    - identifier: portfolio
+      name: Portfolio
+      url: /portfolio
+      weight: 5
     - identifier: categories
       name: Categories
       url: /categories/

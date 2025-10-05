@@ -1,35 +1,6 @@
-/* Modern theme override for PaperMod with vibrant color scheme */
-:root {
-    --gap: 32px;
-    --content-gap: 24px;
-    --nav-width: 1200px;
-    --main-width: 800px;
-    --header-height: 80px;
-    --footer-height: 60px;
-    --radius: 12px;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
-}
+/* Simplified PaperMod theme override - Dark Theme Only */
 
-/* Light theme with clean white background */
 :root {
-    --theme: #ffffff;
-    --entry: #ffffff;
-    --primary: #1a1a1a;
-    --secondary: #4a4a4a;
-    --tertiary: #6a6a6a;
-    --content: #2d2d2d;
-    --code-block-bg: #f8f9fa;
-    --code-bg: #ffffff;
-    --border: #e0e0e0;
-    --accent-blue: #00B4D8;
-    --accent-blue-hover: #0096C7;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* Dark theme with complementary colors */
-.dark {
     --theme: #0f0f0f;
     --entry: #1a1a1a;
     --primary: #ffffff;
@@ -45,33 +16,19 @@
     --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* Global body styling */
+/* Basic styling */
 body {
     font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
     font-size: 1.1rem;
     line-height: 1.6;
-    margin: 0;
     background-color: var(--theme);
     color: var(--primary);
-    font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    min-height: 100vh;
 }
 
-/* Clean white background for light theme */
-body:not(.dark) {
-    background: #ffffff;
-    background-attachment: fixed;
-}
 
-/* Ensure dark theme keeps its dark background */
-.dark body {
-    background: var(--theme) !important;
-    background-attachment: fixed;
-}
-
-/* Modern navigation header */
+/* Modern header */
 .header {
     background-color: var(--theme);
     border-bottom: 1px solid var(--border);
@@ -80,703 +37,15 @@ body:not(.dark) {
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
 }
 
-/* Dark theme header */
-.dark .header {
-    background-color: var(--theme);
-    border-bottom: 1px solid var(--border);
-}
-
-.header .nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: var(--nav-width);
-    margin: 0 auto;
-    padding: 0 2rem;
-    height: 60px;
-}
-
-.header .nav-links {
-    display: flex;
-    gap: 3rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    align-items: center;
-}
-
-.header .nav-links a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    position: relative;
-    padding: 0.5rem 0;
-    letter-spacing: 0.02em;
-}
-
-.header .nav-links a:hover {
-    color: var(--accent-blue);
-}
-
-.header .nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background-color: var(--accent-blue);
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
-}
-
-.header .nav-links a:hover::after {
-    width: 100%;
-}
-
-/* Modern theme toggle button */
-.theme-toggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    color: var(--primary);
-    font-size: 1.2rem;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.theme-toggle:hover {
-    background-color: var(--entry);
-    color: var(--accent-blue);
-    transform: scale(1.05);
-}
-
-.theme-toggle:active {
-    transform: scale(0.95);
-}
-
-/* Theme toggle icon styling */
-.theme-toggle svg {
-    width: 20px;
-    height: 20px;
-    transition: all 0.3s ease;
-}
-
-.theme-toggle:hover svg {
-    transform: rotate(180deg);
-}
-
-/* Modern button styling for nav buttons */
-.header .btn, .header .button {
-    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-hover) 100%);
-    color: white;
-    padding: 0.6rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 180, 216, 0.2);
-}
-
-.header .btn:hover, .header .button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
-    background: linear-gradient(135deg, var(--accent-blue-hover) 0%, var(--accent-blue) 100%);
-}
-
-/* Brand styling */
-.brand, .header .brand {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary);
-    text-decoration: none;
-}
-
-.brand .brand-blue, .header .brand .brand-blue {
-    color: var(--accent-blue);
-}
-
-/* Main content area */
-.main {
-    max-width: var(--main-width);
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-/* Hero section for home page */
-.hero {
-    text-align: center;
-    padding: 4rem 0 6rem 0;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-.hero h1 {
-    font-size: 3.5rem;
-    font-weight: 700;
-    margin: 0 0 1.5rem 0;
-    line-height: 1.1;
-    color: var(--primary);
-}
-
-/* Gradient effect for dark theme only */
-.dark .hero h1 {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-blue) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.hero .subtitle {
-    font-size: 1.5rem;
-    margin: 0 0 2rem 0;
-    color: var(--secondary);
-    font-weight: 500;
-}
-
-.hero .description {
-    font-size: 1.2rem;
-    margin: 0 0 3rem 0;
-    color: var(--content);
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.7;
-}
-
-/* Modern button styling */
-.btn, .button, button, input[type="submit"] {
-    display: inline-block;
-    padding: 1rem 2.5rem;
-    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-hover) 100%);
-    color: white;
-    text-decoration: none;
-    border-radius: var(--radius);
-    font-weight: 600;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    position: relative;
-    overflow: hidden;
-}
-
-.btn:hover, .button:hover, button:hover, input[type="submit"]:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-hover);
-    background: linear-gradient(135deg, var(--accent-blue-hover) 0%, var(--accent-blue) 100%);
-}
-
-.btn-secondary {
-    background: transparent;
-    border: 2px solid var(--accent-blue);
-    color: var(--accent-blue);
-    box-shadow: none;
-}
-
-.btn-secondary:hover {
-    background: var(--accent-blue);
-    color: white;
-    box-shadow: var(--shadow);
-}
-
-/* Input field styling to match image */
-input[type="text"], input[type="email"], input[type="search"], textarea {
-    background-color: #ffffff;
-    border: 1px solid #cccccc;
-    border-radius: 8px;
-    padding: 0.8rem 1rem;
-    font-size: 1rem;
-    color: var(--primary);
-    transition: all 0.3s ease;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-input[type="text"]:focus, input[type="email"]:focus, input[type="search"]:focus, textarea:focus {
-    outline: none;
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.2);
-}
-
-input[type="text"]::placeholder, input[type="email"]::placeholder, input[type="search"]::placeholder, textarea::placeholder {
-    color: #888888;
-}
-
-/* Send button styling */
-.send-button, .search-button {
-    background-color: #000000;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 40px;
-    height: 40px;
-}
-
-.send-button:hover, .search-button:hover {
-    background-color: #333333;
-    transform: scale(1.05);
-}
-
-.send-button svg, .search-button svg {
-    width: 20px;
-    height: 20px;
-    fill: white;
-}
-
-/* Entry cards (posts, pages) */
-.entry {
-    background-color: var(--entry);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2.5rem;
-    margin: 2rem 0;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow);
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* Clean styling for light theme cards */
-body:not(.dark) .entry {
-    background-color: #ffffff;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-}
-
-.entry::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-blue-hover) 100%);
-}
-
-.entry:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-hover);
-    border-color: var(--accent-blue);
-}
-
-.entry-header h1, .entry-header h2 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin: 0 0 1rem 0;
-    color: var(--primary);
-    line-height: 1.3;
-}
-
-.entry-content {
-    color: var(--content);
-    line-height: 1.7;
-    font-size: 1.1rem;
-}
-
-.entry-content h1, .entry-content h2, .entry-content h3 {
-    color: var(--primary);
-    font-weight: 600;
-    margin: 2rem 0 1rem 0;
-}
-
-.entry-content h1 {
-    font-size: 2rem;
-}
-
-.entry-content h2 {
-    font-size: 1.6rem;
-}
-
-.entry-content h3 {
-    font-size: 1.4rem;
-}
-
-/* Links */
-a {
-    color: var(--accent-blue);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-a:hover {
-    color: var(--accent-blue-hover);
-    text-decoration: underline;
-}
-
-/* Code blocks */
-pre, code {
-    background-color: var(--code-block-bg);
-    color: var(--content);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
-}
-
-/* Clean code block styling for light theme */
-body:not(.dark) pre, 
-body:not(.dark) code {
-    background-color: var(--code-block-bg) !important;
-    color: var(--content) !important;
-    border: 1px solid var(--border) !important;
-    box-shadow: var(--shadow) !important;
-}
-
-pre {
-    padding: 1.5rem;
-    overflow-x: auto;
-    box-shadow: var(--shadow);
-}
-
-code {
-    padding: 0.2rem 0.5rem;
-    font-size: 0.9rem;
-}
-
-/* Lists */
-ul, ol {
-    padding-left: 2rem;
-}
-
-li {
-    margin: 0.5rem 0;
-    line-height: 1.6;
-}
-
-/* Blockquotes */
-blockquote {
-    border-left: 4px solid var(--accent-blue);
-    padding-left: 1.5rem;
-    margin: 2rem 0;
-    font-style: italic;
-    color: var(--secondary);
-    background-color: var(--entry);
-    padding: 1.5rem;
-    border-radius: 0 var(--radius) var(--radius) 0;
-}
-
-/* Tables */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 2rem 0;
-    background-color: var(--entry);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-}
-
-th, td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-}
-
-th {
-    background-color: var(--tertiary);
-    font-weight: 600;
-    color: var(--primary);
-}
-
-/* Footer */
-.footer {
-    background-color: var(--entry);
-    border-top: 1px solid var(--border);
-    padding: 2rem 0;
-    margin-top: 4rem;
-    text-align: center;
-    color: var(--secondary);
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .hero h1 {
-        font-size: 2.5rem;
-    }
-    
-    .hero .subtitle {
-        font-size: 1.2rem;
-    }
-    
-    .hero .description {
-        font-size: 1rem;
-    }
-    
-    .header .nav {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 0 1rem;
-    }
-    
-    .header .nav-links {
-        gap: 1.5rem;
-    }
-    
-    .main {
-        padding: 1rem;
-    }
-    
-    .entry {
-        padding: 1.5rem;
-        margin: 1rem 0;
-    }
-    
-    .entry-header h1, .entry-header h2 {
-        font-size: 1.8rem;
-    }
-}
-
-/* Math styling */
-.katex-display {overflow: auto hidden}
-.katex-display > .katex { white-space: normal }
-.katex-display > .base { margin: 0.25em 0 }
-.katex-display { margin: 0.5em 0; }
-.katex .mtable {columnspacing: 0.5em !important;}
-
-/* Theme-specific adjustments */
-.light .entry {
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.light .entry:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.light .header {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.light .btn, .light .button, .light button, .light input[type="submit"] {
-    box-shadow: 0 2px 10px rgba(0, 180, 216, 0.2);
-}
-
-.light .btn:hover, .light .button:hover, .light button:hover, .light input[type="submit"]:hover {
-    box-shadow: 0 4px 20px rgba(0, 180, 216, 0.3);
-}
-
-/* Additional PaperMod overrides */
-.post-meta {
-    color: var(--secondary);
-    font-size: 0.9rem;
-    margin: 1rem 0;
-}
-
-.post-meta a {
-    color: var(--accent-blue);
-}
-
-.post-meta a:hover {
-    color: var(--accent-blue-hover);
-}
-
-/* Search styling */
-.search {
-    background-color: var(--entry);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    margin: 1rem 0;
-}
-
-.search input {
-    background-color: var(--theme);
-    border: 1px solid var(--border);
-    color: var(--primary);
-    border-radius: 8px;
-    padding: 0.8rem;
-    width: 100%;
-    font-size: 1rem;
-}
-
-.search input:focus {
-    outline: none;
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.2);
-}
-
-/* Tag and category styling */
-.tags, .categories {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1rem 0;
-}
-
-.tag, .category {
-    background-color: var(--accent-blue);
-    color: white;
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.tag:hover, .category:hover {
-    background-color: var(--accent-blue-hover);
-    transform: translateY(-1px);
-}
-
-/* Light mode tag styling - light background with dark text */
-body:not(.dark) .tags .tag, 
-body:not(.dark) .categories .category,
-body:not(.dark) .tag,
-body:not(.dark) .category,
-body:not(.dark) a.tag,
-body:not(.dark) a.category {
-    background-color: #f8f9fa !important;
-    color: #2c3e50 !important;
-    border: 1px solid #e9ecef !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    text-decoration: none !important;
-}
-
-body:not(.dark) .tags .tag:hover, 
-body:not(.dark) .categories .category:hover,
-body:not(.dark) .tag:hover, 
-body:not(.dark) .category:hover,
-body:not(.dark) a.tag:hover,
-body:not(.dark) a.category:hover {
-    background-color: #e9ecef !important;
-    color: #1a252f !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-    text-decoration: none !important;
-    transform: translateY(-1px) !important;
-}
-
-/* Additional tag selectors for PaperMod theme */
-body:not(.dark) .post-tags .tag,
-body:not(.dark) .post-categories .category,
-body:not(.dark) .taxonomy .tag,
-body:not(.dark) .taxonomy .category,
-body:not(.dark) [class*="tag"],
-body:not(.dark) [class*="category"] {
-    background-color: #f8f9fa !important;
-    color: #2c3e50 !important;
-    border: 1px solid #e9ecef !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    text-decoration: none !important;
-}
-
-body:not(.dark) .post-tags .tag:hover,
-body:not(.dark) .post-categories .category:hover,
-body:not(.dark) .taxonomy .tag:hover,
-body:not(.dark) .taxonomy .category:hover,
-body:not(.dark) [class*="tag"]:hover,
-body:not(.dark) [class*="category"]:hover {
-    background-color: #e9ecef !important;
-    color: #1a252f !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-    text-decoration: none !important;
-    transform: translateY(-1px) !important;
-}
-
-/* Pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin: 3rem 0;
-}
-
-.pagination a {
-    padding: 0.8rem 1.2rem;
-    background-color: var(--entry);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--primary);
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.pagination a:hover {
-    background-color: var(--accent-blue);
-    color: white;
-    border-color: var(--accent-blue);
-}
-
-.pagination .current {
-    background-color: var(--accent-blue);
-    color: white;
-    border-color: var(--accent-blue);
-}
-
-/* PaperMod specific overrides */
-#theme-toggle {
-    background: none !important;
-    border: none !important;
-    cursor: pointer;
-    padding: 0.5rem !important;
-    border-radius: 8px !important;
-    transition: all 0.3s ease !important;
-    color: var(--primary) !important;
-    font-size: 1.2rem !important;
-    width: 40px !important;
-    height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    position: relative !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-    min-width: auto !important;
-    min-height: auto !important;
-}
-
-#theme-toggle:hover {
-    background-color: var(--entry) !important;
-    color: var(--accent-blue) !important;
-    transform: scale(1.05) !important;
-}
-
-#theme-toggle:active {
-    transform: scale(0.95) !important;
-}
-
-#theme-toggle svg {
-    width: 20px !important;
-    height: 20px !important;
-    transition: all 0.3s ease !important;
-}
-
-#theme-toggle:hover svg {
-    transform: rotate(180deg) !important;
-}
 
-/* Modernize PaperMod navigation */
+/* Navigation */
 .header nav {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    max-width: var(--nav-width) !important;
+    max-width: 1200px !important;
     margin: 0 auto !important;
     padding: 0 2rem !important;
     height: 60px !important;
@@ -791,10 +60,6 @@ body:not(.dark) [class*="category"]:hover {
     align-items: center !important;
 }
 
-.header nav ul li {
-    margin: 0 !important;
-}
-
 .header nav ul li a {
     color: var(--primary) !important;
     text-decoration: none !important;
@@ -803,49 +68,13 @@ body:not(.dark) [class*="category"]:hover {
     transition: all 0.3s ease !important;
     position: relative !important;
     padding: 0.5rem 0 !important;
-    letter-spacing: 0.02em !important;
 }
 
 .header nav ul li a:hover {
     color: var(--accent-blue) !important;
 }
 
-.header nav ul li a::after {
-    content: '' !important;
-    position: absolute !important;
-    bottom: 0 !important;
-    left: 50% !important;
-    width: 0 !important;
-    height: 2px !important;
-    background-color: var(--accent-blue) !important;
-    transition: all 0.3s ease !important;
-    transform: translateX(-50%) !important;
-}
-
-.header nav ul li a:hover::after {
-    width: 100% !important;
-}
-
-/* Modernize PaperMod header */
-.header {
-    background-color: var(--theme) !important;
-    border-bottom: 1px solid var(--border) !important;
-    padding: 1rem 0 !important;
-    box-shadow: var(--shadow) !important;
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 100 !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-}
-
-/* Dark theme header override */
-.dark .header {
-    background-color: var(--theme) !important;
-    border-bottom: 1px solid var(--border) !important;
-}
-
-/* Brand styling for PaperMod */
+/* Brand styling */
 .header .brand {
     font-size: 1.8rem !important;
     font-weight: 700 !important;
@@ -853,12 +82,81 @@ body:not(.dark) [class*="category"]:hover {
     text-decoration: none !important;
 }
 
-.header .brand .brand-blue {
-    color: var(--accent-blue) !important;
+/* Entry cards */
+.entry {
+    background-color: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.entry:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--accent-blue);
 }
 
 
-/* JobInT Simple Link Styling */
+/* Links */
+a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: var(--accent-blue-hover);
+    text-decoration: none;
+}
+
+/* Code blocks */
+pre, code {
+    background-color: var(--code-block-bg);
+    color: var(--content);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+}
+
+
+pre {
+    padding: 1.5rem;
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+}
+
+code {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Tags - dark background with cyan accent */
+.tag, 
+.category,
+a.tag,
+a.category {
+    background-color: #1a1a1a !important;
+    color: #64FFDA !important;
+    border: 1px solid #64FFDA !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    text-decoration: none !important;
+}
+
+.tag:hover, 
+.category:hover,
+a.tag:hover,
+a.category:hover {
+    background-color: #64FFDA !important;
+    color: #1a1a1a !important;
+    box-shadow: 0 4px 8px rgba(100, 255, 218, 0.3) !important;
+    text-decoration: none !important;
+    transform: translateY(-1px) !important;
+}
+
+/* JobInT Link Styling */
 .jobint-link-container {
     margin: 2rem 0 3rem 0;
     text-align: center;
@@ -868,12 +166,11 @@ body:not(.dark) [class*="category"]:hover {
 .jobint-link {
     display: inline-block;
     text-decoration: none;
-    color: var(--primary);
+    color: white;
     font-size: 1.2rem;
     font-weight: 600;
     padding: 1rem 2rem;
     background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
-    color: white;
     border-radius: 25px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
@@ -907,7 +204,320 @@ body:not(.dark) [class*="category"]:hover {
     font-weight: 800;
 }
 
-/* Mobile navigation improvements */
+/* Portfolio Section Styling */
+.portfolio-section {
+    margin: 4rem 0;
+    padding: 0 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.portfolio-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.portfolio-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    color: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+
+.portfolio-header p {
+    font-size: 1.2rem;
+    color: var(--secondary);
+    margin: 0;
+}
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.portfolio-card {
+    background-color: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    position: relative;
+}
+
+.portfolio-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--accent-blue);
+}
+
+
+.portfolio-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background-color: var(--code-block-bg);
+}
+
+.portfolio-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.portfolio-card:hover .portfolio-image img {
+    transform: scale(1.05);
+}
+
+.portfolio-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--tertiary);
+    background-color: var(--code-block-bg);
+}
+
+.portfolio-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.portfolio-card:hover .portfolio-overlay {
+    opacity: 1;
+}
+
+.portfolio-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.portfolio-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: var(--accent-blue);
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.portfolio-link:hover {
+    background-color: var(--accent-blue-hover);
+    transform: scale(1.1);
+    color: white;
+    text-decoration: none;
+}
+
+.github-link {
+    background-color: #333;
+}
+
+.github-link:hover {
+    background-color: #555;
+}
+
+.demo-link {
+    background-color: var(--accent-blue);
+}
+
+.demo-link:hover {
+    background-color: var(--accent-blue-hover);
+}
+
+.portfolio-content {
+    padding: 1.5rem;
+}
+
+.portfolio-content h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 0.8rem 0;
+    color: var(--primary);
+}
+
+.portfolio-content p {
+    color: var(--content);
+    margin: 0 0 1.2rem 0;
+    line-height: 1.6;
+}
+
+.portfolio-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tech-tag {
+    background-color: var(--code-block-bg);
+    color: var(--accent-blue);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.tech-tag:hover {
+    background-color: var(--accent-blue);
+    color: var(--theme);
+    transform: translateY(-1px);
+}
+
+.portfolio-footer {
+    text-align: center;
+}
+
+.portfolio-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-hover) 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.portfolio-more-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    color: white;
+    text-decoration: none;
+}
+
+/* Portfolio Page Styling */
+.portfolio-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.portfolio-page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.portfolio-page-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    color: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+
+.portfolio-page-header p {
+    font-size: 1.2rem;
+    color: var(--secondary);
+    margin: 0;
+}
+
+.portfolio-grid-full {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.featured-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #333;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.portfolio-card {
+    position: relative;
+}
+
+/* Portfolio Carousel Styling */
+.portfolio-carousel {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.carousel-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.carousel-image.active {
+    opacity: 1;
+}
+
+.carousel-indicators {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    background-color: var(--accent-blue);
+    transform: scale(1.2);
+}
+
+.indicator:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile responsive */
 @media (max-width: 768px) {
     .header nav {
         flex-direction: column !important;
@@ -922,52 +532,43 @@ body:not(.dark) [class*="category"]:hover {
         justify-content: center !important;
     }
     
-    #theme-toggle {
-        width: 36px !important;
-        height: 36px !important;
+    .jobint-link {
         font-size: 1rem !important;
+        padding: 0.8rem 1.5rem !important;
     }
     
-    .jobint-hero h1 {
-        font-size: 2.2rem;
+    .portfolio-section {
+        padding: 0 1rem;
+        margin: 2rem 0;
     }
     
-    .jobint-hero p {
-        font-size: 1.1rem;
-    }
-    
-    .jobint-features {
+    .portfolio-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
     
-    /* Simple link mobile styling */
-    .jobint-link {
-        font-size: 1rem !important;
-        padding: 0.8rem 1.5rem !important;
-        display: inline-block !important;
+    .portfolio-header h2 {
+        font-size: 2rem;
     }
-}
-
-/* Final override for light mode tags - highest specificity */
-html body:not(.dark) .tags a.tag,
-html body:not(.dark) .categories a.category,
-html body:not(.dark) a.tag,
-html body:not(.dark) a.category {
-    background-color: #f8f9fa !important;
-    color: #2c3e50 !important;
-    border: 1px solid #e9ecef !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    text-decoration: none !important;
-}
-
-html body:not(.dark) .tags a.tag:hover,
-html body:not(.dark) .categories a.category:hover,
-html body:not(.dark) a.tag:hover,
-html body:not(.dark) a.category:hover {
-    background-color: #e9ecef !important;
-    color: #1a252f !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-    text-decoration: none !important;
-    transform: translateY(-1px) !important;
+    
+    .portfolio-header p {
+        font-size: 1rem;
+    }
+    
+    .portfolio-page {
+        padding: 1rem;
+    }
+    
+    .portfolio-page-header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .portfolio-page-header p {
+        font-size: 1rem;
+    }
+    
+    .portfolio-grid-full {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 }

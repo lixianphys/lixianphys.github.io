@@ -2,5 +2,7 @@
 {{ partial "math.html" . }}
 {{ end }}
 
-
+{{- if or .IsHome (eq .Layout "portfolio/list") }}
+{{- partial "carousel-script.html" . }}
+{{- end }}
 
