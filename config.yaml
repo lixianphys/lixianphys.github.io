@@ -96,11 +96,19 @@ params:
 
   # Portfolio projects
   portfolio:
+    - title: "BabyCare360-demo - A RAG-based AI Assistant for Baby Care"
+      description: "A RAG-based AI Assistant for Baby Care"
+      image: "images/portfolio/babycare-rag-main.png"
+      technologies: ["RAG", "LLM", "Vector Database","OpenAI", "Langchain", "LangGraph", "LangSmith"]
+      github: "https://github.com/lixianphys/babycare-llm-rag"
+      demo: "https://huggingface.co/spaces/lx1201/babycare"
+      featured: true
+
     - title: "JobInT - IT Job Info API"
       description: "RESTful API service providing real-time IT job market data for Germany"
       image: "images/portfolio/jobint-api.png"
       technologies: ["AWS Lambda", "PostgreSQL", "FastAPI"]
-      github: "https://github.com/lixianphys/jobint-api"
+      github: "https://github.com/lixianphys/job-insight-aws"
       demo: "https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/"
       featured: true
     - title: "MRI Image helper"

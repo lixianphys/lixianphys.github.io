@@ -262,7 +262,10 @@ a.category:hover {
 
 .portfolio-image {
     position: relative;
-    height: 200px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
     background-color: var(--code-block-bg);
 }
@@ -272,6 +275,7 @@ a.category:hover {
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
+    align-items: center;
 }
 
 .portfolio-card:hover .portfolio-image img {
