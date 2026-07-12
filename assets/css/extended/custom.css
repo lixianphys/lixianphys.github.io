@@ -243,6 +243,18 @@ a:hover {
     color: var(--accent);
 }
 
+/* ps -u lixian table */
+.t-ps .t-pid {
+    display: inline-block;
+    min-width: 4ch;
+}
+
+.t-ps .t-proc {
+    display: inline-block;
+    min-width: 29ch;
+    margin-right: 1ch;
+}
+
 .t-avatar {
     width: 92px;
     height: 92px;
