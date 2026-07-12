@@ -1,0 +1,15 @@
+{{- define "main" }}
+<div class="term-404">
+    <p><span class="prompt-sign">$</span> cd <span id="notfound-path">/this/page</span></p>
+    <p class="err">bash: cd: <span id="notfound-path2">/this/page</span>: No such file or directory</p>
+    <p>&nbsp;</p>
+    <p><span class="prompt-sign">$</span> <a href="{{ "" | absLangURL }}">cd ~</a> <span class="blink">█</span></p>
+</div>
+<script>
+    (function () {
+        var p = window.location.pathname || '/this/page';
+        document.getElementById('notfound-path').textContent = p;
+        document.getElementById('notfound-path2').textContent = p;
+    })();
+</script>
+{{- end }}

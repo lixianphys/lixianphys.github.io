@@ -74,12 +74,6 @@ params:
         url: /portfolio
 
 
-  socialIcons: # optional
-    - name: "<platform>"
-      url: "<link>"
-    - name: "<platform 2>"
-      url: "<link2>"
-
   # home-info mode
   homeInfoParams:
     Title: "\U0001F44B Welcome"
@@ -160,30 +154,27 @@ params:
     keys: ["title", "permalink", "summary", "content"]
 menu:
   main:
-    - identifier: portfolio
-      name: Portfolio
-      url: /portfolio
-      weight: 5
-    - identifier: categories
-      name: Categories
-      url: /categories/
-      weight: 50
-    - identifier: tags
-      name: Tags
-      url: /tags/
-      weight: 30
     - identifier: posts
-      name: Posts
+      name: ~/posts
       url: /posts/
       weight: 10
-    - identifier: search
-      name: Search
-      url: /search/
-      weight: 40
-    - identifier: archives
-      name: Archive
-      url: /archives/
+    - identifier: portfolio
+      name: ~/portfolio
+      url: /portfolio
       weight: 20
+    - identifier: tags
+      name: ~/tags
+      url: /tags/
+      weight: 30
+    - identifier: archives
+      name: ~/archive
+      url: /archives/
+      weight: 40
+    - identifier: search
+      name: ⌕ search
+      title: search
+      url: /search/
+      weight: 50
 
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true

@@ -1,0 +1,94 @@
+{{- $profile := site.Params.profileMode }}
+<div class="terminal-home term-window" id="terminal-home">
+    <div class="term-titlebar">
+        <span class="term-dots">
+            <span class="term-dot red"></span>
+            <span class="term-dot amber"></span>
+            <span class="term-dot green"></span>
+        </span>
+        <span class="term-name">lixian@web: ~</span>
+    </div>
+    <div class="term-body term-seq">
+        <p class="t-line t-cmd-line"><span class="prompt-sign">$</span> <span class="t-cmd">imgcat avatar.png</span></p>
+        <div class="t-line t-out">
+            <img class="t-avatar" src="{{ $profile.imageUrl | absURL }}" alt="{{ $profile.imageTitle | default "Lixian" }}" width="92" height="92" />
+        </div>
+        <p class="t-line t-cmd-line"><span class="prompt-sign">$</span> <span class="t-cmd">whoami</span></p>
+        <div class="t-line t-out">
+            <p class="t-line">Lixian Wang — software engineer · ex-physicist</p>
+            <p class="t-line t-dim">open-source projects, learning notes &amp; random thoughts live here.</p>
+        </div>
+        <p class="t-line t-cmd-line"><span class="prompt-sign">$</span> <span class="t-cmd">cat featured.txt</span></p>
+        <div class="t-line t-out">
+            <p class="t-line"><span class="t-yellow">→</span> <a href="https://cyznbpcm70.execute-api.us-east-1.amazonaws.com/" rel="noopener" target="_blank">JobInT</a> — real-time IT job-market API for Germany.</p>
+            <p class="t-line t-dim">try it out and tell me what breaks.</p>
+        </div>
+        <p class="t-line t-cmd-line"><span class="prompt-sign">$</span> <span class="t-cmd">ls links/</span></p>
+        <div class="t-line t-out t-links">
+            {{- range site.Params.socialIcons }}
+            <a href="{{ .url }}" rel="noopener" target="_blank">{{ .name }}/</a>
+            {{- end }}
+            <a href="{{ "portfolio" | absURL }}">portfolio/</a>
+        </div>
+        <p class="t-line t-cmd-line"><span class="prompt-sign">$</span> <span class="blink">█</span></p>
+    </div>
+</div>
+<script>
+(function () {
+    var term = document.getElementById('terminal-home');
+    if (!term) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (sessionStorage.getItem('term-typed')) return;
+
+    var lines = Array.prototype.slice.call(term.querySelectorAll('.term-seq > .t-line'));
+    var timers = [];
+    var done = false;
+    term.classList.add('typing');
+
+    function finish() {
+        if (done) return;
+        done = true;
+        timers.forEach(clearTimeout);
+        lines.forEach(function (line) {
+            line.classList.add('t-shown');
+            var cmd = line.querySelector('.t-cmd');
+            if (cmd) cmd.textContent = cmd.dataset.full;
+        });
+        term.classList.remove('typing');
+        sessionStorage.setItem('term-typed', '1');
+    }
+
+    function later(fn, ms) {
+        timers.push(setTimeout(fn, ms));
+    }
+
+    function play(i) {
+        if (done) return;
+        if (i >= lines.length) { finish(); return; }
+        var line = lines[i];
+        line.classList.add('t-shown');
+        var cmd = line.querySelector('.t-cmd');
+        if (!cmd) { later(function () { play(i + 1); }, 250); return; }
+        var full = cmd.dataset.full;
+        var pos = 0;
+        (function type() {
+            if (done) return;
+            cmd.textContent = full.slice(0, ++pos);
+            if (pos < full.length) later(type, 24);
+            else later(function () { play(i + 1); }, 300);
+        })();
+    }
+
+    lines.forEach(function (line) {
+        var cmd = line.querySelector('.t-cmd');
+        if (cmd) {
+            cmd.dataset.full = cmd.textContent;
+            cmd.textContent = '';
+        }
+    });
+
+    term.addEventListener('click', finish);
+    document.addEventListener('keydown', finish, { once: true });
+    later(function () { play(0); }, 350);
+})();
+</script>

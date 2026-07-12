@@ -1,0 +1,9 @@
+{{- if (.Param "ShowBreadCrumbs") -}}
+<div class="breadcrumbs">
+    <a href="{{ "" | absLangURL }}">~</a>
+    {{- range after 1 .Ancestors.Reverse -}}
+    /<a href="{{ .Permalink }}">{{ path.Base .RelPermalink }}</a>
+    {{- end -}}
+    /{{ with .File }}{{ .ContentBaseName }}{{ else }}{{ path.Base .RelPermalink }}{{ end }}
+</div>
+{{- end -}}
