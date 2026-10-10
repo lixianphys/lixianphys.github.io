@@ -2,11 +2,11 @@
 // live clearance distances for the selected item.
 import {
   add, sub, mul, dist, norm, rotate, snap, closestPointOnSegment, raySegment, edges, bbox, centroid, len,
-} from './geometry.js';
+} from './geometry.js?v=d711b78469';
 import {
   itemOutline, wallOf, openingGeom, checkPlan, worstLevel, insertVertex, roomArea, FLAT_HEIGHT,
   partitionOutline, partitionLength, partitionCeiling,
-} from './model.js';
+} from './model.js?v=d711b78469';
 
 const NS = 'http://www.w3.org/2000/svg';
 const SNAP_WALL = 8; // cm: items closer than this to a wall snap flush against it

@@ -2,11 +2,11 @@ import {
   Store, defaultPlan, blankPlan, rectRoom, newItem, wallOf, checkPlan, worstLevel, setWallLength,
   removeVertex, insertVertex, roomArea, roomAt, uid, FLOORS,
   newPartition, partitionLength, partitionCeiling, setPartitionLength, HALF_WALL,
-} from './model.js';
-import { CATALOG } from './catalog.js';
-import { Plan2D } from './plan2d.js';
-import { bbox, snap, centroid, pointInPolygon } from './geometry.js';
-import { startSync, saveFile } from './sync.js';
+} from './model.js?v=d711b78469';
+import { CATALOG } from './catalog.js?v=d711b78469';
+import { Plan2D } from './plan2d.js?v=d711b78469';
+import { bbox, snap, centroid, pointInPolygon } from './geometry.js?v=d711b78469';
+import { startSync, saveFile } from './sync.js?v=d711b78469';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -79,7 +79,7 @@ async function setView(mode) {
   document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === mode)));
   if (mode !== 'plan' && !view3d) {
     try {
-      const { View3D } = await import('./view3d.js');
+      const { View3D } = await import('./view3d.js?v=d711b78469');
       view3d = new View3D($('#view3d-pane'), store);
       view3d.showCandidates = plan2d.showCandidates;
     } catch (e) {
@@ -115,7 +115,7 @@ function setMeasure(on) {
   if (on) toast('Click two points to measure. Esc to stop.');
 }
 function setDraw(on, tool = 'draw') {
-  if (on && plan2d.locked) { toast('The layout is locked. Unlock it to draw.'); return; }
+  if (on && plan2d.locked) { toast('Rooms are locked. Choose “Edit rooms” to draw.'); return; }
   if (on && prefs.view === '3d') setView('both');
   plan2d.setTool(on ? tool : 'select');
 }
@@ -138,17 +138,16 @@ function setLocked(on, announce) {
   plan2d.locked = on;
   prefs.locked = on; savePrefs();
   if (on && (plan2d.tool === 'draw' || plan2d.tool === 'wall')) plan2d.setTool('select');
-  const b = $('#toggle-lock');
-  b.setAttribute('aria-pressed', String(on));
-  $('#lock-label').textContent = on ? 'Layout locked' : 'Lock layout';
-  b.title = on ? 'Unlock to change rooms, walls, doors and windows (L)' : 'Lock rooms, walls, doors and windows so only furniture moves (L)';
+  $('#layout-edit').setAttribute('aria-pressed', String(!on));
+  $('#layout-lock').setAttribute('aria-pressed', String(on));
   for (const id of ['tool-draw', 'tool-wall']) $('#' + id).disabled = on;
   document.querySelectorAll('#tab-rooms button, #tab-rooms input').forEach((x) => { if (!x.dataset.selectRoom && !x.dataset.selectPartition) x.disabled = on; });
   inspectorKey = '';
   store.emit();
-  if (announce) toast(on ? 'Layout locked. Only furniture moves now.' : 'Layout unlocked. Rooms, walls, doors and windows can be edited.');
+  if (announce) toast(on ? 'Rooms and walls are locked. Only furniture moves now.' : 'Rooms, walls, doors and windows can be edited again.');
 }
-$('#toggle-lock').addEventListener('click', () => setLocked(!plan2d.locked, true));
+$('#layout-edit').addEventListener('click', () => { if (plan2d.locked) setLocked(false, true); });
+$('#layout-lock').addEventListener('click', () => { if (!plan2d.locked) setLocked(true, true); });
 $('#toggle-snap').addEventListener('click', (e) => {
   plan2d.snapOn = !plan2d.snapOn;
   e.currentTarget.setAttribute('aria-pressed', String(plan2d.snapOn));
@@ -265,7 +264,7 @@ function renderInspector() {
     else if (sel.kind === 'partition') box.innerHTML = partitionHtml(target);
     else box.innerHTML = roomHtml(target, sel);
     if (fixed) {
-      box.innerHTML = `<div class="lock-note"><span>Layout locked. Unlock to change it.</span><button class="btn" data-action="unlock">Unlock</button></div>
+      box.innerHTML = `<div class="lock-note"><span>Rooms are locked: only furniture moves.</span><button class="btn" data-action="unlock">Edit rooms</button></div>
         <fieldset class="plain" disabled>${box.innerHTML}</fieldset>`;
     }
   } else {
@@ -611,7 +610,7 @@ function duplicateSelected() {
 function deleteSelected() {
   const sel = store.selection;
   if (!sel) return;
-  if (plan2d.locked && sel.kind !== 'item') { toast('The layout is locked. Unlock it to remove this.'); return; }
+  if (plan2d.locked && sel.kind !== 'item') { toast('Rooms are locked. Choose “Edit rooms” to remove this.'); return; }
   if (sel.kind === 'item') {
     const name = store.selected?.name;
     store.edit((p) => { p.items = p.items.filter((x) => x.id !== sel.id); store.selection = null; });

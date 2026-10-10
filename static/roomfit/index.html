@@ -2,7 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=d711b78469">
 <script>
   // Boot check: if the app hasn't started after a few seconds (old browser, blocked script),
   // show what went wrong instead of a blank page.
@@ -33,8 +33,9 @@
       <button id="view-both" data-view="both" aria-pressed="false">Both</button>
     </div>
 
-    <div class="bar-group">
-      <button class="btn lock-btn" id="toggle-lock" aria-pressed="false" title="Lock rooms, walls, doors and windows so only furniture moves (L)"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path class="shackle" d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg><span id="lock-label">Lock layout</span></button>
+    <div class="seg layout-seg" role="group" aria-label="What can be moved">
+      <button id="layout-edit" aria-pressed="true" title="Rooms, walls, doors, windows and furniture can all be changed (L)">Edit rooms</button>
+      <button id="layout-lock" aria-pressed="false" title="Rooms and walls are locked; only furniture moves (L)"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>Furniture only</button>
     </div>
     <div class="bar-group secondary">
       <button class="btn" id="tool-draw" aria-pressed="false" title="Draw a room corner by corner (N)">Draw room</button>
@@ -132,5 +133,5 @@
   <pre id="boot-detail"></pre>
 </div>
 
-<script type="module" src="js/pages.js"></script>
+<script type="module" src="js/pages.js?v=d711b78469"></script>
 </body></html>

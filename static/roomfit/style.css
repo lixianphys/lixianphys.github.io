@@ -200,10 +200,8 @@ svg.plan.measuring { cursor: crosshair; }
   padding: 6px 8px; border-radius: var(--radius); background: var(--raised); border: 1px solid var(--line); box-shadow: var(--shadow);
 }
 .sel-name { font-weight: 600; font-size: 14px; padding-inline: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lock-btn { display: inline-flex; align-items: center; gap: 6px; }
-.lock-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; }
-.lock-btn[aria-pressed="false"] .shackle { transform: translateX(3px) rotate(-12deg); transform-origin: 10.5px 7px; }
-.lock-btn[aria-pressed="true"] { background: var(--tape); color: var(--tape-ink); border-color: var(--tape); }
+.layout-seg button { display: inline-flex; align-items: center; gap: 5px; }
+.layout-seg svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.7; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 svg.plan.locked .room, svg.plan.locked .partition, svg.plan.locked .partition-label, svg.plan.locked .opening { cursor: default; }
 .lock-note { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border: 1px solid var(--tape); border-radius: var(--radius); background: var(--raised); font-size: 14px; }

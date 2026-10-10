@@ -1,6 +1,6 @@
 // Sync through one private GitHub Gist holding the encrypted plan. Used by the GitHub Pages
 // build. The Gist only ever contains ciphertext plus the (non-secret) salt and a timestamp.
-import { seal, unseal } from './vault.js';
+import { seal, unseal } from './vault.js?v=d711b78469';
 
 const API = 'https://api.github.com';
 export const GIST_FILE = 'roomfit-plan.json';
