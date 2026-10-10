@@ -115,6 +115,7 @@ function setMeasure(on) {
   if (on) toast('Click two points to measure. Esc to stop.');
 }
 function setDraw(on, tool = 'draw') {
+  if (on && plan2d.locked) { toast('The layout is locked. Unlock it to draw.'); return; }
   if (on && prefs.view === '3d') setView('both');
   plan2d.setTool(on ? tool : 'select');
 }
@@ -130,6 +131,24 @@ document.querySelectorAll('[data-dir]').forEach((b) => b.addEventListener('click
   $('#draw-len').value = '';
 }));
 $('#tool-measure').addEventListener('click', () => setMeasure(plan2d.tool !== 'measure'));
+
+// Layout lock: rooms, walls, doors and windows stay put; only furniture moves. On by default
+// on touch screens, where a slipped finger easily drags a wall.
+function setLocked(on, announce) {
+  plan2d.locked = on;
+  prefs.locked = on; savePrefs();
+  if (on && (plan2d.tool === 'draw' || plan2d.tool === 'wall')) plan2d.setTool('select');
+  const b = $('#toggle-lock');
+  b.setAttribute('aria-pressed', String(on));
+  $('#lock-label').textContent = on ? 'Layout locked' : 'Lock layout';
+  b.title = on ? 'Unlock to change rooms, walls, doors and windows (L)' : 'Lock rooms, walls, doors and windows so only furniture moves (L)';
+  for (const id of ['tool-draw', 'tool-wall']) $('#' + id).disabled = on;
+  document.querySelectorAll('#tab-rooms button, #tab-rooms input').forEach((x) => { if (!x.dataset.selectRoom && !x.dataset.selectPartition) x.disabled = on; });
+  inspectorKey = '';
+  store.emit();
+  if (announce) toast(on ? 'Layout locked. Only furniture moves now.' : 'Layout unlocked. Rooms, walls, doors and windows can be edited.');
+}
+$('#toggle-lock').addEventListener('click', () => setLocked(!plan2d.locked, true));
 $('#toggle-snap').addEventListener('click', (e) => {
   plan2d.snapOn = !plan2d.snapOn;
   e.currentTarget.setAttribute('aria-pressed', String(plan2d.snapOn));
@@ -234,8 +253,9 @@ let inspectorKey = '';
 function renderInspector() {
   const sel = store.selection;
   const target = store.selected;
+  const fixed = plan2d.locked && target && sel.kind !== 'item';
   const key = !target ? 'none'
-    : `${sel.kind}:${sel.id}:${sel.index ?? ''}:${target.shape || target.type || ''}:${target.points?.length || ''}:${target.swing || ''}:${sel.kind === 'partition' ? target.height < partitionCeiling(store.plan, target) : ''}`;
+    : `${fixed}:${sel.kind}:${sel.id}:${sel.index ?? ''}:${target.shape || target.type || ''}:${target.points?.length || ''}:${target.swing || ''}:${sel.kind === 'partition' ? target.height < partitionCeiling(store.plan, target) : ''}`;
   const box = $('#inspector');
   if (key !== inspectorKey) {
     inspectorKey = key;
@@ -244,6 +264,10 @@ function renderInspector() {
     else if (sel.kind === 'opening') box.innerHTML = openingHtml(target);
     else if (sel.kind === 'partition') box.innerHTML = partitionHtml(target);
     else box.innerHTML = roomHtml(target, sel);
+    if (fixed) {
+      box.innerHTML = `<div class="lock-note"><span>Layout locked. Unlock to change it.</span><button class="btn" data-action="unlock">Unlock</button></div>
+        <fieldset class="plain" disabled>${box.innerHTML}</fieldset>`;
+    }
   } else {
     // same thing selected: refresh values in place so typing isn't interrupted
     box.querySelectorAll('[data-k]').forEach((input) => {
@@ -474,6 +498,19 @@ $('#inspector').addEventListener('change', (e) => {
   });
 });
 
+// floating actions for the selected piece of furniture, so a phone needn't scroll to the panel
+$('#sel-bar').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  if (btn.dataset.action === 'details') $('#inspector').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  else runAction(btn.dataset.action, btn);
+});
+function renderSelBar() {
+  const it = store.selection?.kind === 'item' ? store.selected : null;
+  $('#sel-bar').hidden = !it;
+  if (it) $('#sel-name').textContent = it.name;
+}
+
 $('#inspector').addEventListener('click', (e) => {
   const sel = e.target.closest('[data-select-item],[data-select-opening]');
   if (sel) {
@@ -521,6 +558,7 @@ function runAction(action, btn) {
       break;
     }
     case 'select-room': store.select({ kind: 'room', id: btn.dataset.room }); break;
+    case 'unlock': setLocked(false, true); break;
     case 'partition-full': case 'partition-half':
       store.edit((p) => { target.height = action === 'partition-half' ? HALF_WALL : partitionCeiling(p, target); });
       inspectorKey = '';
@@ -573,7 +611,12 @@ function duplicateSelected() {
 function deleteSelected() {
   const sel = store.selection;
   if (!sel) return;
-  if (sel.kind === 'item') store.edit((p) => { p.items = p.items.filter((x) => x.id !== sel.id); store.selection = null; });
+  if (plan2d.locked && sel.kind !== 'item') { toast('The layout is locked. Unlock it to remove this.'); return; }
+  if (sel.kind === 'item') {
+    const name = store.selected?.name;
+    store.edit((p) => { p.items = p.items.filter((x) => x.id !== sel.id); store.selection = null; });
+    toast(`Removed ${name}. Undo (↶) brings it back.`);
+  }
   else if (sel.kind === 'opening') store.edit((p) => { p.openings = p.openings.filter((x) => x.id !== sel.id); store.selection = null; });
   else if (sel.kind === 'partition') store.edit((p) => { p.partitions = p.partitions.filter((x) => x.id !== sel.id); store.selection = null; });
   else if (sel.kind === 'vertex') {
@@ -744,6 +787,7 @@ document.addEventListener('keydown', (e) => {
     case 'm': case 'M': setMeasure(plan2d.tool !== 'measure'); break;
     case 'n': case 'N': setDraw(plan2d.tool !== 'draw'); break;
     case 'w': case 'W': setDraw(plan2d.tool !== 'wall', 'wall'); break;
+    case 'l': case 'L': setLocked(!plan2d.locked, true); break;
     case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight': {
       if (!it) return;
       e.preventDefault();
@@ -766,6 +810,7 @@ store.subscribe(() => {
   $('#banner').hidden = !store.plan.sample;
   renderInspector();
   renderLists();
+  renderSelBar();
 });
 
 roomsTabStatic();
@@ -773,6 +818,7 @@ furnitureTabStatic();
 setTab(prefs.tab || 'furniture');
 store.emit();
 setView(prefs.view || 'plan');
+setLocked(prefs.locked !== undefined ? prefs.locked : matchMedia('(pointer: coarse)').matches, false);
 requestAnimationFrame(() => plan2d.fit());
 
 window.__roomfitStarted = true;

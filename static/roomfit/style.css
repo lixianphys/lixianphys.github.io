@@ -194,6 +194,20 @@ svg.plan.measuring { cursor: crosshair; }
 .partition.half { fill: var(--muted); fill: color-mix(in srgb, var(--wall) 35%, var(--paper)); stroke-dasharray: 5 3; }
 .partition.selected { stroke: var(--tape); }
 .partition-label { fill: var(--ink); font-family: var(--font-mono); text-anchor: middle; dominant-baseline: central; cursor: move; paint-order: stroke; stroke: var(--paper); stroke-width: 3px; }
+.sel-bar {
+  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 6;
+  display: flex; align-items: center; gap: 6px; max-width: calc(100% - 24px);
+  padding: 6px 8px; border-radius: var(--radius); background: var(--raised); border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.sel-name { font-weight: 600; font-size: 14px; padding-inline: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lock-btn { display: inline-flex; align-items: center; gap: 6px; }
+.lock-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.lock-btn[aria-pressed="false"] .shackle { transform: translateX(3px) rotate(-12deg); transform-origin: 10.5px 7px; }
+.lock-btn[aria-pressed="true"] { background: var(--tape); color: var(--tape-ink); border-color: var(--tape); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+svg.plan.locked .room, svg.plan.locked .partition, svg.plan.locked .partition-label, svg.plan.locked .opening { cursor: default; }
+.lock-note { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border: 1px solid var(--tape); border-radius: var(--radius); background: var(--raised); font-size: 14px; }
+fieldset.plain { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: inherit; }
 .wall-label.static { cursor: default; pointer-events: none; }
 .vertex.selected { fill: var(--tape); }
 
@@ -348,6 +362,10 @@ kbd { font: 12px var(--font-mono); border: 1px solid var(--line); border-bottom-
   .hint { display: none; }
   .topbar { padding-block: 6px; }
   .bar-group.secondary .label { display: none; }
+  .topbar, .bar-group { flex-wrap: wrap; }
+  .sel-bar { bottom: 8px; gap: 4px; padding: 5px 6px; }
+  .sel-bar .btn { padding-inline: 9px; }
+  .sel-name { display: none; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

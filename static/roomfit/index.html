@@ -33,6 +33,9 @@
       <button id="view-both" data-view="both" aria-pressed="false">Both</button>
     </div>
 
+    <div class="bar-group">
+      <button class="btn lock-btn" id="toggle-lock" aria-pressed="false" title="Lock rooms, walls, doors and windows so only furniture moves (L)"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path class="shackle" d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg><span id="lock-label">Lock layout</span></button>
+    </div>
     <div class="bar-group secondary">
       <button class="btn" id="tool-draw" aria-pressed="false" title="Draw a room corner by corner (N)">Draw room</button>
       <button class="btn" id="tool-wall" aria-pressed="false" title="Draw an inner wall or half wall (W)">Inner wall</button>
@@ -101,6 +104,13 @@
     <section class="pane" id="view3d-pane" aria-label="3D view">
       <p class="pane-tag">3D · drag to orbit, click to select</p>
     </section>
+    <div class="sel-bar" id="sel-bar" role="toolbar" aria-label="Selected furniture" hidden>
+      <span class="sel-name" id="sel-name"></span>
+      <button class="btn" data-action="rot-right" title="Rotate 90° (R)">⟳ 90°</button>
+      <button class="btn" data-action="duplicate">Duplicate</button>
+      <button class="btn danger" data-action="delete">Remove</button>
+      <button class="btn" data-action="details">Details</button>
+    </div>
   </main>
 
   <aside class="rail">

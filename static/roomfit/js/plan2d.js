@@ -36,6 +36,7 @@ export class Plan2D {
     this.drag = null;
     this.pointers = new Map();
     this.showCandidates = true;
+    this.locked = false;  // layout locked: only furniture can be moved
 
     this.svg.addEventListener('pointerdown', (e) => this.onDown(e));
     this.svg.addEventListener('pointermove', (e) => this.onMove(e));
@@ -104,6 +105,7 @@ export class Plan2D {
     const { plan, selection: sel } = this.store;
     const v = this.view;
     this.svg.setAttribute('viewBox', `${v.x} ${v.y} ${w / v.scale} ${h / v.scale}`);
+    this.svg.classList.toggle('locked', this.locked);
     this.svg.textContent = '';
     this.issues = checkPlan(plan);
 
@@ -168,7 +170,7 @@ export class Plan2D {
 
     // wall length labels for the selected room
     const selRoom = sel && (sel.kind === 'room' || sel.kind === 'vertex') ? plan.rooms.find((r) => r.id === sel.id) : null;
-    if (selRoom) this.renderWallLabels(selRoom, sel);
+    if (selRoom && !this.locked) this.renderWallLabels(selRoom, sel);
 
     // items (flat ones first so they sit underneath)
     const gItems = el('g', {}, this.svg);
@@ -197,7 +199,7 @@ export class Plan2D {
     }
     if (sel?.kind === 'partition') {
       const pw = plan.partitions.find((x) => x.id === sel.id);
-      if (pw) this.renderPartitionHandles(pw);
+      if (pw && !this.locked) this.renderPartitionHandles(pw);
     }
     this.renderMeasure();
     this.renderDraft();
@@ -499,8 +501,10 @@ export class Plan2D {
     }
 
     const h = this.hit(e);
-    if (e.button === 1 || e.button === 2 || !h || e.shiftKey) {
-      if (!h && e.button === 0) store.select(null);
+    // with the layout locked, touching a room, wall, door or window just pans the view
+    const fixed = this.locked && h && h.kind !== 'item';
+    if (e.button === 1 || e.button === 2 || !h || fixed || e.shiftKey) {
+      if ((!h || fixed) && e.button === 0) store.select(null);
       this.drag = { kind: 'pan', start: { x: e.clientX, y: e.clientY }, view0: { ...this.view } };
       return;
     }
@@ -655,6 +659,7 @@ export class Plan2D {
   }
 
   onDblClick(e) {
+    if (this.locked) return;
     const p = this.toPlan(e);
     const { plan } = this.store;
     // double-click near a wall of the selected room inserts a corner there
