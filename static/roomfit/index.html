@@ -1,0 +1,117 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#f2c200"></head><body><title>RoomFit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<script>
+  // Boot check: if the app hasn't started after a few seconds (old browser, blocked script),
+  // show what went wrong instead of a blank page.
+  (function () {
+    var errors = [];
+    window.addEventListener('error', function (e) { errors.push((e.message || 'Script failed to load') + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '')); }, true);
+    window.addEventListener('unhandledrejection', function (e) { errors.push(String(e.reason && (e.reason.message || e.reason))); });
+    setTimeout(function () {
+      if (window.__roomfitStarted) return;
+      var box = document.getElementById('boot-error');
+      var text = 'Browser: ' + navigator.userAgent + '\n' + (errors.length ? errors.join('\n') : 'No error reported; the app script did not run.');
+      document.getElementById('boot-detail').textContent = text;
+      box.hidden = false;
+    }, 6000);
+  })();
+</script>
+
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <b>Room<span>Fit</span></b>
+      <input id="plan-name" aria-label="Plan name" maxlength="60">
+    </div>
+
+    <div class="seg" role="group" aria-label="View">
+      <button id="view-plan" data-view="plan" aria-pressed="true">Plan</button>
+      <button id="view-3d" data-view="3d" aria-pressed="false">3D</button>
+      <button id="view-both" data-view="both" aria-pressed="false">Both</button>
+    </div>
+
+    <div class="bar-group secondary">
+      <button class="btn" id="tool-draw" aria-pressed="false" title="Draw a room corner by corner (N)">Draw room</button>
+      <button class="btn" id="tool-measure" aria-pressed="false" title="Measure a distance (M)">Measure</button>
+      <button class="btn" id="toggle-snap" aria-pressed="true" title="Snap to 5 cm grid and walls">Snap</button>
+      <button class="btn" id="toggle-candidates" aria-pressed="true" title="Show furniture you're considering">Considering</button>
+    </div>
+
+    <div class="bar-group">
+      <button class="btn icon" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+      <button class="btn icon" id="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↷</button>
+      <button class="btn" id="fit" title="Zoom to the whole plan">Fit</button>
+    </div>
+
+    <div class="spacer"></div>
+    <span class="sync" id="sync" data-state="local">Saved in this browser</span>
+
+    <div class="menu-wrap">
+      <button class="btn" id="menu-btn" aria-haspopup="true" aria-expanded="false">Plan ▾</button>
+      <div class="menu" id="menu" hidden>
+        <button id="m-export">Export backup (.json)</button>
+        <button id="m-import">Import backup…</button>
+        <button id="m-copy">Copy plan as text</button>
+        <hr>
+        <button id="m-blank">Start a blank plan</button>
+        <button id="m-sample">Load the sample flat</button>
+        <button id="m-lock" hidden>Lock now</button>
+      </div>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden>
+    <p><b>This is a sample flat.</b> Move things around to see how it works, then start a blank plan and enter your own measurements.</p>
+    <button class="btn" id="banner-blank">Start my plan</button>
+    <button class="btn" id="banner-keep">Keep the sample</button>
+  </div>
+
+  <main class="workspace mode-plan" id="workspace">
+    <section class="pane" id="plan-pane" aria-label="Floor plan">
+      <div class="draw-help" id="draw-help" hidden>
+        <p><b>Drawing a room.</b> Click each corner. Type a length in cm and press <kbd>Enter</kbd> to place the next corner exactly. Click the first corner to finish. <kbd>Backspace</kbd> undoes a corner.</p>
+        <div class="row draw-step">
+          <label for="draw-len" class="small">Next wall</label>
+          <span class="unit" data-unit="cm"><input id="draw-len" type="number" min="1" step="0.5" inputmode="decimal" placeholder="length"></span>
+          <button class="btn icon" data-dir="up" aria-label="Place the next corner up">↑</button>
+          <button class="btn icon" data-dir="right" aria-label="Place the next corner right">→</button>
+          <button class="btn icon" data-dir="down" aria-label="Place the next corner down">↓</button>
+          <button class="btn icon" data-dir="left" aria-label="Place the next corner left">←</button>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="draw-done">Finish room</button>
+          <button class="btn" id="draw-cancel">Cancel</button>
+        </div>
+      </div>
+      <p class="hint">Drag to move · <kbd>Shift</kbd>+drag or empty space to pan · wheel to zoom · <kbd>R</kbd> rotate · <kbd>Del</kbd> remove · all sizes in cm</p>
+    </section>
+    <section class="pane" id="view3d-pane" aria-label="3D view">
+      <p class="pane-tag">3D · drag to orbit, click to select</p>
+    </section>
+  </main>
+
+  <aside class="rail">
+    <div class="inspector" id="inspector"></div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="tab-btn-rooms" data-tab="rooms" aria-selected="false">Rooms</button>
+      <button role="tab" id="tab-btn-furniture" data-tab="furniture" aria-selected="true">Furniture</button>
+      <button role="tab" id="tab-btn-shopping" data-tab="shopping" aria-selected="false">Shopping</button>
+    </nav>
+    <div class="tab" id="tab-rooms" role="tabpanel" hidden></div>
+    <div class="tab" id="tab-furniture" role="tabpanel"></div>
+    <div class="tab" id="tab-shopping" role="tabpanel" hidden></div>
+  </aside>
+</div>
+<div class="toast" id="toast" hidden></div>
+<div class="boot-error" id="boot-error" hidden>
+  <h2>RoomFit couldn't start in this browser</h2>
+  <p>Updating iOS (Settings → General → Software Update) usually fixes this. If it doesn't, copy the details below and send them to me.</p>
+  <pre id="boot-detail"></pre>
+</div>
+
+<script type="module" src="js/pages.js"></script>
+</body></html>
