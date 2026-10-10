@@ -190,6 +190,11 @@ svg.plan.measuring { cursor: crosshair; }
 .draft text { fill: var(--surface); font-family: var(--font-mono); text-anchor: middle; dominant-baseline: central; }
 .draft rect.live + text { fill: var(--tape-ink); }
 .vertex { fill: var(--surface); stroke: var(--wall); cursor: grab; }
+.partition { fill: var(--wall); stroke: var(--wall); cursor: move; }
+.partition.half { fill: var(--muted); fill: color-mix(in srgb, var(--wall) 35%, var(--paper)); stroke-dasharray: 5 3; }
+.partition.selected { stroke: var(--tape); }
+.partition-label { fill: var(--ink); font-family: var(--font-mono); text-anchor: middle; dominant-baseline: central; cursor: move; paint-order: stroke; stroke: var(--paper); stroke-width: 3px; }
+.wall-label.static { cursor: default; pointer-events: none; }
 .vertex.selected { fill: var(--tape); }
 
 .item { cursor: grab; }

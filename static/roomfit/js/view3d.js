@@ -5,7 +5,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/+esm';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js/+esm';
 import { sub, dot, len, bbox } from './geometry.js';
-import { wallOf, openingGeom, checkPlan, worstLevel } from './model.js';
+import { wallOf, openingGeom, checkPlan, worstLevel, partitionLength } from './model.js';
 
 const WALL_T = 10;
 
@@ -88,8 +88,9 @@ export class View3D {
       const ndc = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       const ray = new THREE.Raycaster();
       ray.setFromCamera(ndc, this.camera);
-      const hit = ray.intersectObjects(this.content.children, true).find((h) => findItemId(h.object));
-      this.store.select(hit ? { kind: 'item', id: findItemId(hit.object) } : null);
+      const hit = ray.intersectObjects(this.content.children, true).find((h) => findItemId(h.object) || h.object.userData.partitionId);
+      const partitionId = hit?.object.userData.partitionId;
+      this.store.select(!hit ? null : partitionId ? { kind: 'partition', id: partitionId } : { kind: 'item', id: findItemId(hit.object) });
     });
   }
 
@@ -148,6 +149,22 @@ export class View3D {
         }
         if (cursor < w.length) this.addWall(w, cursor, w.length, 0, room.height, wallMat);
       });
+    }
+
+    // inner walls (half walls stop short of the ceiling)
+    for (const pw of plan.partitions) {
+      const L = partitionLength(pw);
+      if (L < 1 || pw.height < 0.5) continue;
+      const selected = selection?.kind === 'partition' && selection.id === pw.id;
+      const geo = new THREE.BoxGeometry(L, pw.height, pw.thickness);
+      const m = new THREE.Mesh(geo, wallMat);
+      m.position.set((pw.a.x + pw.b.x) / 2, pw.height / 2, (pw.a.y + pw.b.y) / 2);
+      m.rotation.y = -Math.atan2(pw.b.y - pw.a.y, pw.b.x - pw.a.x);
+      m.userData.partitionId = pw.id;
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: selected ? token('--tape', '#f2c200') : token('--muted', '#888') }));
+      edges.position.copy(m.position);
+      edges.rotation.copy(m.rotation);
+      this.content.add(m, edges);
     }
 
     // window glass

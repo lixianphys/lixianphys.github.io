@@ -5,6 +5,7 @@ import {
 } from './geometry.js';
 import {
   itemOutline, wallOf, openingGeom, checkPlan, worstLevel, insertVertex, roomArea, FLAT_HEIGHT,
+  partitionOutline, partitionLength, partitionCeiling,
 } from './model.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -19,8 +20,9 @@ function el(tag, attrs = {}, parent) {
 const ptsAttr = (pts) => pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 
 export class Plan2D {
-  constructor(container, store, { onEditWall, onRoomDrawn, onToolChange } = {}) {
+  constructor(container, store, { onEditWall, onRoomDrawn, onWallDrawn, onToolChange } = {}) {
     this.store = store;
+    this.onWallDrawn = onWallDrawn;
     this.onEditWall = onEditWall;
     this.onRoomDrawn = onRoomDrawn;
     this.onToolChange = onToolChange;
@@ -28,7 +30,7 @@ export class Plan2D {
     this.view = { x: -60, y: -60, scale: 1.5 }; // scale = px per cm
     this.grid = 5;
     this.snapOn = true;
-    this.tool = 'select'; // select | measure | draw
+    this.tool = 'select'; // select | measure | draw (a room) | wall (an inner wall)
     this.measure = null;  // {a, b, done}
     this.draft = null;    // room being drawn: {pts, cursor, typed}
     this.drag = null;
@@ -89,7 +91,7 @@ export class Plan2D {
   setTool(tool) {
     this.tool = tool;
     this.measure = null;
-    this.draft = tool === 'draw' ? { pts: [], cursor: null, typed: '' } : null;
+    this.draft = tool === 'draw' || tool === 'wall' ? { pts: [], cursor: null, typed: '' } : null;
     this.svg.classList.toggle('measuring', tool !== 'select');
     this.onToolChange?.(tool);
     this.render();
@@ -145,6 +147,25 @@ export class Plan2D {
       el('line', { x1: g.start.x, y1: g.start.y, x2: g.end.x, y2: g.end.y, class: 'hit', 'stroke-width': this.px(16) }, grp);
     }
 
+    // inner walls: solid when full height, hatched when lower than the ceiling
+    const gPart = el('g', {}, this.svg);
+    for (const pw of plan.partitions) {
+      const selected = sel?.kind === 'partition' && sel.id === pw.id;
+      const half = pw.height < partitionCeiling(plan, pw);
+      el('polygon', {
+        points: ptsAttr(partitionOutline(pw)), class: 'partition' + (half ? ' half' : '') + (selected ? ' selected' : ''),
+        'stroke-width': this.px(selected ? 2.5 : 1.2), 'data-partition': pw.id,
+      }, gPart);
+      if (half && !selected) {
+        const m = mul(add(pw.a, pw.b), 0.5);
+        const fs = this.px(10);
+        if (partitionLength(pw) * this.view.scale > 70) {
+          const t = el('text', { x: m.x, y: m.y, class: 'partition-label', 'font-size': fs, 'data-partition': pw.id }, gPart);
+          t.textContent = `h ${pw.height}`;
+        }
+      }
+    }
+
     // wall length labels for the selected room
     const selRoom = sel && (sel.kind === 'room' || sel.kind === 'vertex') ? plan.rooms.find((r) => r.id === sel.id) : null;
     if (selRoom) this.renderWallLabels(selRoom, sel);
@@ -173,6 +194,10 @@ export class Plan2D {
     if (sel?.kind === 'item') {
       const it = plan.items.find((x) => x.id === sel.id);
       if (it && !it.hidden) this.renderClearances(it);
+    }
+    if (sel?.kind === 'partition') {
+      const pw = plan.partitions.find((x) => x.id === sel.id);
+      if (pw) this.renderPartitionHandles(pw);
     }
     this.renderMeasure();
     this.renderDraft();
@@ -223,11 +248,32 @@ export class Plan2D {
     });
   }
 
+  renderPartitionHandles(pw) {
+    const g = el('g', {}, this.svg);
+    const d = sub(pw.b, pw.a), L = len(d);
+    if (L > 1) {
+      const n = { x: -d.y / L, y: d.x / L };
+      const txt = `${Math.round(L * 10) / 10} cm`;
+      const bw = this.px(8 + txt.length * 6.4), bh = this.px(17);
+      const off = pw.thickness / 2 + this.px(10) + Math.abs(n.x) * bw / 2 + Math.abs(n.y) * bh / 2;
+      const pos = add(mul(add(pw.a, pw.b), 0.5), mul(n, -off));
+      const grp = el('g', { class: 'wall-label static' }, g);
+      el('rect', { x: pos.x - bw / 2, y: pos.y - bh / 2, width: bw, height: bh, rx: this.px(4) }, grp);
+      el('text', { x: pos.x, y: pos.y, 'font-size': this.px(11) }, grp).textContent = txt;
+    }
+    [pw.a, pw.b].forEach((p, i) => {
+      el('circle', { cx: p.x, cy: p.y, r: this.px(7), class: 'vertex', 'data-pend': i, 'data-partition': pw.id, 'stroke-width': this.px(2) }, g);
+    });
+  }
+
   // Distance from each side of the item to the nearest wall/item, drawn as dimension lines.
   clearances(it) {
     const { plan } = this.store;
     const segs = [];
     for (const r of plan.rooms) segs.push(...edges(r.points));
+    for (const pw of plan.partitions) {
+      if (it.h > FLAT_HEIGHT && it.elevation < pw.height && partitionLength(pw) >= 1) segs.push(...edges(partitionOutline(pw)));
+    }
     for (const o of plan.items) {
       if (o.id === it.id || o.hidden || o.h <= FLAT_HEIGHT || it.h <= FLAT_HEIGHT) continue;
       if (!(o.elevation < it.elevation + it.h && it.elevation < o.elevation + o.h)) continue;
@@ -300,7 +346,7 @@ export class Plan2D {
       });
     }
     d.pts.forEach((q, i) => {
-      const closable = i === 0 && d.pts.length >= 3;
+      const closable = i === 0 && d.pts.length >= 3 && this.tool === 'draw';
       el('circle', { cx: q.x, cy: q.y, r: this.px(closable ? 8 : 5), class: closable ? 'first' : '', 'stroke-width': this.px(2) }, g);
     });
   }
@@ -322,14 +368,32 @@ export class Plan2D {
     const d = this.draft;
     const r = this.px(12);
     if (d.pts.length >= 3 && dist(p, d.pts[0]) < r) return { ...d.pts[0] };
-    for (const room of this.store.plan.rooms) for (const q of room.points) if (dist(p, q) < r) return { ...q };
-    const out = this.snapPt(p);
+    const { plan } = this.store;
+    for (const room of plan.rooms) for (const q of room.points) if (dist(p, q) < r) return { ...q };
+    for (const pw of plan.partitions) for (const q of [pw.a, pw.b]) if (dist(p, q) < r) return { ...q };
+    let out = this.snapPt(p);
     const last = d.pts[d.pts.length - 1];
     if (last) { // keep walls straight when close to horizontal/vertical
       if (Math.abs(out.x - last.x) < this.px(10)) out.x = last.x;
       if (Math.abs(out.y - last.y) < this.px(10)) out.y = last.y;
     }
+    // an inner wall starts or ends flush against a wall
+    if (this.tool === 'wall') out = this.onWallLine(out, r);
     return out;
+  }
+
+  // the closest point on any room wall or inner wall within r, else p
+  onWallLine(p, r, skipId) {
+    const { plan } = this.store;
+    let best = null;
+    const segs = plan.rooms.flatMap((room) => edges(room.points));
+    for (const pw of plan.partitions) if (pw.id !== skipId) segs.push([pw.a, pw.b]);
+    for (const [a, b] of segs) {
+      const c = closestPointOnSegment(p, a, b).point;
+      const dd = dist(p, c);
+      if (dd < r && (!best || dd < best.d)) best = { d: dd, pt: c };
+    }
+    return best ? { x: Math.round(best.pt.x * 10) / 10, y: Math.round(best.pt.y * 10) / 10 } : p;
   }
 
   addDraftPoint(pt) {
@@ -338,6 +402,7 @@ export class Plan2D {
     if (d.pts.length && dist(pt, d.pts[d.pts.length - 1]) < 1) return;
     d.pts.push(pt);
     d.typed = '';
+    if (this.tool === 'wall' && d.pts.length === 2) return this.finishDraft();
     this.render();
   }
 
@@ -354,6 +419,13 @@ export class Plan2D {
 
   finishDraft() {
     const pts = this.draft?.pts || [];
+    const round = (q) => ({ x: Math.round(q.x * 10) / 10, y: Math.round(q.y * 10) / 10 });
+    if (this.tool === 'wall') {
+      if (pts.length < 2) return false;
+      this.setTool('select');
+      this.onWallDrawn?.(round(pts[0]), round(pts[1]));
+      return true;
+    }
     if (pts.length < 3) return false;
     this.setTool('select');
     this.onRoomDrawn?.(pts.map((q) => ({ x: Math.round(q.x * 10) / 10, y: Math.round(q.y * 10) / 10 })));
@@ -385,8 +457,10 @@ export class Plan2D {
 
   // ---------- interaction ----------
   hit(e) {
-    const t = e.target.closest('[data-vertex],[data-mid],[data-wall],[data-opening],[data-item],[data-room]');
+    const t = e.target.closest('[data-pend],[data-vertex],[data-mid],[data-wall],[data-opening],[data-item],[data-partition],[data-room]');
     if (!t) return null;
+    if (t.dataset.pend !== undefined) return { kind: 'pend', id: t.dataset.partition, index: +t.dataset.pend };
+    if (t.dataset.partition) return { kind: 'partition', id: t.dataset.partition };
     if (t.dataset.mid !== undefined) return { kind: 'mid', id: t.dataset.room, index: +t.dataset.mid };
     if (t.dataset.vertex !== undefined) return { kind: 'vertex', id: t.dataset.room, index: +t.dataset.vertex };
     if (t.dataset.wall !== undefined) return { kind: 'wall', id: t.dataset.room, index: +t.dataset.wall };
@@ -418,7 +492,7 @@ export class Plan2D {
       return;
     }
 
-    if (this.tool === 'draw') {
+    if (this.tool === 'draw' || this.tool === 'wall') {
       // a tap places a corner; a drag pans (decided on release)
       this.drag = { kind: 'pan', start: { x: e.clientX, y: e.clientY }, view0: { ...this.view }, tap: this.draftPoint(p) };
       return;
@@ -458,6 +532,14 @@ export class Plan2D {
       store.selection = { kind: 'opening', id: op.id };
       const g = openingGeom(op, room);
       this.drag = { kind: 'opening', op, room, grabOffset: closestPointOnSegment(p, g.wall.a, g.wall.b).t * g.wall.length - op.offset, moved: false };
+    } else if (h.kind === 'partition') {
+      const pw = plan.partitions.find((x) => x.id === h.id);
+      store.selection = { kind: 'partition', id: pw.id };
+      this.drag = { kind: 'partition', pw, start: p, a0: { ...pw.a }, b0: { ...pw.b }, moved: false };
+    } else if (h.kind === 'pend') {
+      const pw = plan.partitions.find((x) => x.id === h.id);
+      store.selection = { kind: 'partition', id: pw.id };
+      this.drag = { kind: 'pend', pw, index: h.index, moved: false };
     } else if (h.kind === 'room') {
       const room = plan.rooms.find((r) => r.id === h.id);
       store.selection = { kind: 'room', id: room.id };
@@ -476,7 +558,7 @@ export class Plan2D {
       this.render();
       return;
     }
-    if (this.tool === 'draw' && !this.drag) {
+    if ((this.tool === 'draw' || this.tool === 'wall') && !this.drag) {
       this.draft.cursor = this.draftPoint(p);
       this.render();
       return;
@@ -508,6 +590,18 @@ export class Plan2D {
       if (this.snapOn) this.snapToWalls(it);
     } else if (d.kind === 'vertex') {
       d.room.points[d.index] = this.snapVertex(p, d.room, d.index);
+    } else if (d.kind === 'partition') {
+      const delta = this.snapPt(sub(p, d.start));
+      d.pw.a = add(d.a0, delta);
+      d.pw.b = add(d.b0, delta);
+    } else if (d.kind === 'pend') {
+      const other = d.index === 0 ? d.pw.b : d.pw.a;
+      const r = this.px(12);
+      let q = this.snapPt(p);
+      if (Math.abs(q.x - other.x) < r) q.x = other.x;
+      if (Math.abs(q.y - other.y) < r) q.y = other.y;
+      if (this.snapOn) q = this.onWallLine(q, r, d.pw.id);
+      d.pw[d.index === 0 ? 'a' : 'b'] = q;
     } else if (d.kind === 'room') {
       const delta = this.snapPt(sub(p, d.start));
       d.room.points = d.pts0.map((q) => add(q, delta));

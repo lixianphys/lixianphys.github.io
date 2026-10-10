@@ -1,6 +1,7 @@
 import {
   Store, defaultPlan, blankPlan, rectRoom, newItem, wallOf, checkPlan, worstLevel, setWallLength,
   removeVertex, insertVertex, roomArea, roomAt, uid, FLOORS,
+  newPartition, partitionLength, partitionCeiling, setPartitionLength, HALF_WALL,
 } from './model.js';
 import { CATALOG } from './catalog.js';
 import { Plan2D } from './plan2d.js';
@@ -37,11 +38,26 @@ const plan2d = new Plan2D($('#plan-pane'), store, {
     toast(`${room.name} added: ${roomArea(room).toFixed(1)} m². Rename it and set the ceiling height on the right.`);
     document.getElementById('f-name')?.focus();
   },
+  onWallDrawn(a, b) {
+    const half = $('#wall-kind').value === 'half';
+    const pw = newPartition(a, b, 0);
+    pw.height = half ? HALF_WALL : partitionCeiling(store.plan, pw);
+    store.edit((p) => { p.partitions.push(pw); p.sample = false; store.selection = { kind: 'partition', id: pw.id }; });
+    toast(`${half ? 'Half wall' : 'Inner wall'} added, ${Math.round(partitionLength(pw))} cm long. Change its height and thickness on the right.`);
+  },
   onToolChange(tool) {
     $('#tool-measure').setAttribute('aria-pressed', String(tool === 'measure'));
     $('#tool-draw').setAttribute('aria-pressed', String(tool === 'draw'));
-    $('#draw-help').hidden = tool !== 'draw';
-    if (tool === 'draw') $('#draw-len').value = '';
+    $('#tool-wall').setAttribute('aria-pressed', String(tool === 'wall'));
+    const wall = tool === 'wall';
+    $('#draw-help').hidden = tool !== 'draw' && !wall;
+    $('#draw-text-room').hidden = wall;
+    $('#draw-text-wall').hidden = !wall;
+    $('#wall-kind-row').hidden = !wall;
+    $('#draw-done').hidden = wall;
+    $('#draw-len-label').textContent = wall ? 'Length' : 'Next wall';
+    if (wall) $('#wall-kind').value = prefs.wallKind || 'full';
+    if (tool === 'draw' || wall) $('#draw-len').value = '';
   },
 });
 
@@ -98,17 +114,19 @@ function setMeasure(on) {
   plan2d.setTool(on ? 'measure' : 'select');
   if (on) toast('Click two points to measure. Esc to stop.');
 }
-function setDraw(on) {
+function setDraw(on, tool = 'draw') {
   if (on && prefs.view === '3d') setView('both');
-  plan2d.setTool(on ? 'draw' : 'select');
+  plan2d.setTool(on ? tool : 'select');
 }
 $('#tool-draw').addEventListener('click', () => setDraw(plan2d.tool !== 'draw'));
+$('#tool-wall').addEventListener('click', () => setDraw(plan2d.tool !== 'wall', 'wall'));
+$('#wall-kind').addEventListener('change', (e) => { prefs.wallKind = e.target.value; savePrefs(); });
 $('#draw-done').addEventListener('click', () => { if (!plan2d.finishDraft()) toast('A room needs at least 3 corners.'); });
 $('#draw-cancel').addEventListener('click', () => setDraw(false));
 document.querySelectorAll('[data-dir]').forEach((b) => b.addEventListener('click', () => {
   const L = parseFloat($('#draw-len').value);
   if (!(L > 0)) { toast('Type the wall length in cm first.'); $('#draw-len').focus(); return; }
-  if (plan2d.placeDraftStep(b.dataset.dir, L) === 'no-start') { toast('Tap the plan to place the first corner.'); return; }
+  if (plan2d.placeDraftStep(b.dataset.dir, L) === 'no-start') { toast(plan2d.tool === 'wall' ? 'Tap the plan where the wall starts.' : 'Tap the plan to place the first corner.'); return; }
   $('#draw-len').value = '';
 }));
 $('#tool-measure').addEventListener('click', () => setMeasure(plan2d.tool !== 'measure'));
@@ -217,13 +235,14 @@ function renderInspector() {
   const sel = store.selection;
   const target = store.selected;
   const key = !target ? 'none'
-    : `${sel.kind}:${sel.id}:${sel.index ?? ''}:${target.shape || target.type || ''}:${target.points?.length || ''}:${target.swing || ''}`;
+    : `${sel.kind}:${sel.id}:${sel.index ?? ''}:${target.shape || target.type || ''}:${target.points?.length || ''}:${target.swing || ''}:${sel.kind === 'partition' ? target.height < partitionCeiling(store.plan, target) : ''}`;
   const box = $('#inspector');
   if (key !== inspectorKey) {
     inspectorKey = key;
     if (!target) box.innerHTML = overviewHtml();
     else if (sel.kind === 'item') box.innerHTML = itemHtml(target);
     else if (sel.kind === 'opening') box.innerHTML = openingHtml(target);
+    else if (sel.kind === 'partition') box.innerHTML = partitionHtml(target);
     else box.innerHTML = roomHtml(target, sel);
   } else {
     // same thing selected: refresh values in place so typing isn't interrupted
@@ -237,6 +256,8 @@ function renderInspector() {
       if (input === document.activeElement) return;
       input.value = Math.round(wallOf(target, +input.dataset.wall).length * 10) / 10;
     });
+    const plen = box.querySelector('[data-plen]');
+    if (plen && plen !== document.activeElement) plen.value = Math.round(partitionLength(target) * 10) / 10;
     if (sel?.kind === 'vertex') {
       const p = target.points[sel.index];
       for (const [axis, input] of [['x', box.querySelector('#vx')], ['y', box.querySelector('#vy')]]) {
@@ -257,6 +278,10 @@ function issuesHtml(list) {
 function dynamicHtml(target, sel) {
   if (!target) return '';
   if (sel.kind === 'item') return issuesHtml(issues.get(target.id));
+  if (sel.kind === 'partition') {
+    const ceiling = partitionCeiling(store.plan, target);
+    return `<p class="muted small">${target.height >= ceiling ? `Floor to ceiling (${ceiling} cm)` : `${ceiling - target.height} cm below the ${ceiling} cm ceiling`}. Furniture standing below its top that touches it gets flagged.</p>`;
+  }
   if (sel.kind === 'room' || sel.kind === 'vertex') {
     const corner = sel.kind === 'vertex' ? ` · corner ${sel.index + 1} is ${Math.round(cornerAngle(target, sel.index))}°` : '';
     return `<p class="muted small">${roomArea(target).toFixed(2)} m² floor · ${(roomArea(target) * target.height / 100).toFixed(1)} m³ · ${target.points.length} corners${corner}</p>`;
@@ -364,6 +389,25 @@ function roomHtml(room, sel) {
     ${ops.length ? `<ul class="list">${ops.map((o) => `<li><button data-select-opening="${o.id}"><span class="swatch"></span><span class="name">${o.type === 'door' ? (o.swing === 'none' ? 'Opening' : 'Door') : 'Window'} on wall ${o.wall + 1}</span><span class="meta">${o.width} cm</span></button></li>`).join('')}</ul>` : ''}`;
 }
 
+function partitionHtml(pw) {
+  const f = (x) => fieldHtml(x, pw);
+  return `
+    <p class="eyebrow">Inner wall</p>
+    <h2>${pw.height < partitionCeiling(store.plan, pw) ? 'Half wall' : 'Wall'}</h2>
+    <div id="insp-dynamic"></div>
+    <div class="fields">
+      <label class="field"><span>Length</span><span class="unit" data-unit="cm"><input id="p-len" data-plen type="number" step="0.5" min="1" inputmode="decimal" value="${Math.round(partitionLength(pw) * 10) / 10}"></span></label>
+      ${f(NUM('height', 'Height', 'cm', { min: 1 }))}
+      ${f(NUM('thickness', 'Thickness', 'cm', { min: 1 }))}
+    </div>
+    <div class="row">
+      <button class="btn" data-action="partition-full">Floor to ceiling</button>
+      <button class="btn" data-action="partition-half">Half wall · ${HALF_WALL} cm</button>
+    </div>
+    <p class="muted small">Drag the wall to move it, or drag an end. Length changes keep the first end in place.</p>
+    <div class="row"><button class="btn danger" data-action="delete-partition">Remove wall</button></div>`;
+}
+
 function openingHtml(op) {
   const room = store.plan.rooms.find((r) => r.id === op.roomId);
   const f = (x) => fieldHtml(x, op);
@@ -399,6 +443,12 @@ $('#inspector').addEventListener('change', (e) => {
     const idx = store.selection.index;
     if (Number.isNaN(v) || idx === undefined) return renderInspector();
     store.edit(() => { target.points[idx] = { ...target.points[idx], [input.dataset.vertexAxis]: v }; });
+    return;
+  }
+  if (input.dataset.plen !== undefined) {
+    const v = parseFloat(input.value);
+    if (!(v > 0)) return renderInspector();
+    store.edit(() => setPartitionLength(target, v));
     return;
   }
   if (input.dataset.wall !== undefined) {
@@ -471,6 +521,12 @@ function runAction(action, btn) {
       break;
     }
     case 'select-room': store.select({ kind: 'room', id: btn.dataset.room }); break;
+    case 'partition-full': case 'partition-half':
+      store.edit((p) => { target.height = action === 'partition-half' ? HALF_WALL : partitionCeiling(p, target); });
+      inspectorKey = '';
+      renderInspector();
+      break;
+    case 'delete-partition': deleteSelected(); break;
     case 'split-wall': {
       const i = +btn.dataset.index;
       const w = wallOf(target, i);
@@ -519,6 +575,7 @@ function deleteSelected() {
   if (!sel) return;
   if (sel.kind === 'item') store.edit((p) => { p.items = p.items.filter((x) => x.id !== sel.id); store.selection = null; });
   else if (sel.kind === 'opening') store.edit((p) => { p.openings = p.openings.filter((x) => x.id !== sel.id); store.selection = null; });
+  else if (sel.kind === 'partition') store.edit((p) => { p.partitions = p.partitions.filter((x) => x.id !== sel.id); store.selection = null; });
   else if (sel.kind === 'vertex') {
     const room = store.selected;
     if (room.points.length <= 3) { toast('A room needs at least 3 corners.'); return; }
@@ -538,11 +595,16 @@ function roomsTabStatic() {
       <label class="field"><span>Ceiling</span><span class="unit" data-unit="cm"><input id="nr-h" type="number" value="250" min="50" inputmode="decimal"></span></label>
       <button class="btn primary wide" type="submit" style="grid-column: 1 / -1">Add room</button>
     </form>
+    <h3>Inner walls</h3>
+    <ul class="list" id="partitions-list"></ul>
+    <button class="btn primary" type="button" id="draw-wall-btn">Draw an inner wall or half wall</button>
+    <p class="muted small">For a wall that stands inside a room, like a half wall by the kitchen or a partition. Furniture that runs into it gets flagged. Things above a half wall (a shelf at 150 cm, say) don’t.</p>
     <h3>Irregular room</h3>
     <button class="btn primary" type="button" id="draw-room-btn">Draw a room corner by corner</button>
     <p class="muted small">Click each corner in turn. To place the next corner at an exact distance, point in its direction, type the length in cm and press Enter. Click the first corner (or press Enter) to close the shape.</p>
     <p class="muted small">Measure each room inside, wall to wall, at floor level. Drag rooms so their walls touch; corners snap together. To reshape any room, select it and tap the <b>+</b> in the middle of a wall.</p>`;
   $('#draw-room-btn').addEventListener('click', () => setDraw(true));
+  $('#draw-wall-btn').addEventListener('click', () => setDraw(true, 'wall'));
   $('#add-room').addEventListener('submit', (e) => {
     e.preventDefault();
     const w = parseFloat($('#nr-w').value), d = parseFloat($('#nr-d').value), h = parseFloat($('#nr-h').value);
@@ -592,6 +654,15 @@ function renderLists() {
       <span class="name">${esc(r.name)}</span>
       <span class="meta">${roomArea(r).toFixed(1)} m² · ${r.height}</span>
     </button></li>`).join('') || '<li class="muted small">No rooms yet. Add your first one below.</li>';
+
+  $('#partitions-list').innerHTML = plan.partitions.map((pw, i) => {
+    const half = pw.height < partitionCeiling(plan, pw);
+    return `<li><button data-select-partition="${pw.id}" class="${sel && sel.id === pw.id ? 'active' : ''}">
+      <span class="swatch" style="background: var(--wall)"></span>
+      <span class="name">${half ? 'Half wall' : 'Wall'} ${i + 1}</span>
+      <span class="meta">${Math.round(partitionLength(pw))} cm · ${pw.height} high</span>
+    </button></li>`;
+  }).join('');
 
   const items = [...plan.items].sort((a, b) => (a.status === b.status ? a.name.localeCompare(b.name) : a.status === 'candidate' ? -1 : 1));
   $('#items-list').innerHTML = items.map((it) => {
@@ -648,6 +719,8 @@ $('#tab-shopping').addEventListener('click', (e) => {
 $('#tab-rooms').addEventListener('click', (e) => {
   const s = e.target.closest('[data-select-room]');
   if (s) store.select({ kind: 'room', id: s.dataset.selectRoom });
+  const pt = e.target.closest('[data-select-partition]');
+  if (pt) store.select({ kind: 'partition', id: pt.dataset.selectPartition });
 });
 
 // ---------- keyboard ----------
@@ -657,7 +730,7 @@ document.addEventListener('keydown', (e) => {
   if (mod && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); e.shiftKey ? store.redo() : store.undo(); return; }
   if (mod && e.key.toLowerCase() === 'y' && !typing) { e.preventDefault(); store.redo(); return; }
   if (typing) return;
-  if (plan2d.tool === 'draw' && !mod && plan2d.draftKey(e)) { e.preventDefault(); return; }
+  if ((plan2d.tool === 'draw' || plan2d.tool === 'wall') && !mod && plan2d.draftKey(e)) { e.preventDefault(); return; }
   if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicateSelected(); return; }
   if (mod) return;
   const it = store.selection?.kind === 'item' ? store.selected : null;
@@ -670,6 +743,7 @@ document.addEventListener('keydown', (e) => {
     case 'r': case 'R': rotateSelected(e.shiftKey ? -90 : 90); break;
     case 'm': case 'M': setMeasure(plan2d.tool !== 'measure'); break;
     case 'n': case 'N': setDraw(plan2d.tool !== 'draw'); break;
+    case 'w': case 'W': setDraw(plan2d.tool !== 'wall', 'wall'); break;
     case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight': {
       if (!it) return;
       e.preventDefault();

@@ -7,6 +7,8 @@ import {
 const STORAGE_KEY = 'roomfit:v1';
 // Items this thin (rugs, mats) never collide with anything standing on them.
 export const FLAT_HEIGHT = 3;
+// Default height of a half wall (kitchen counter / room divider height).
+export const HALF_WALL = 110;
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -23,6 +25,7 @@ export function defaultPlan() {
     sample: true,
     updatedAt: 0,
     rooms: [living, bed, hall],
+    partitions: [],
     openings: [
       { id: uid(), type: 'door', roomId: living.id, wall: 1, offset: 250, width: 85, height: 205, sill: 0, hinge: 'end', swing: 'in' },
       { id: uid(), type: 'door', roomId: hall.id, wall: 2, offset: 70, width: 90, height: 205, sill: 0, hinge: 'start', swing: 'in' },
@@ -44,7 +47,7 @@ export function defaultPlan() {
 
 export function blankPlan() {
   const room = rectRoom('Room 1', 400, 300, 250);
-  return { version: 1, name: 'My apartment', sample: false, updatedAt: Date.now(), rooms: [room], openings: [], items: [] };
+  return { version: 1, name: 'My apartment', sample: false, updatedAt: Date.now(), rooms: [room], partitions: [], openings: [], items: [] };
 }
 
 export function rectRoom(name, w, d, height, origin = { x: 0, y: 0 }) {
@@ -108,6 +111,27 @@ const toWorld = (it) => (p) => add(rotate(p, it.rot), { x: it.x, y: it.y });
 
 export const itemOutline = (it) => localOutline(it).map(toWorld(it));
 export const itemParts = (it) => localParts(it).map((part) => part.map(toWorld(it)));
+
+// Inner walls ("partitions"): a straight wall of any height standing inside a room.
+export function newPartition(a, b, height) {
+  return { id: uid(), a: { ...a }, b: { ...b }, thickness: 10, height };
+}
+export function partitionOutline(pw) {
+  const L = len(sub(pw.b, pw.a));
+  const dir = L > 1e-9 ? norm(sub(pw.b, pw.a)) : { x: 1, y: 0 };
+  const n = mul(perp(dir), pw.thickness / 2);
+  return [add(pw.a, n), add(pw.b, n), sub(pw.b, n), sub(pw.a, n)];
+}
+export const partitionLength = (pw) => len(sub(pw.b, pw.a));
+// Ceiling height where the inner wall stands (for "full height").
+export function partitionCeiling(plan, pw) {
+  return roomAt(plan, mul(add(pw.a, pw.b), 0.5))?.height || 250;
+}
+export function setPartitionLength(pw, newLen) {
+  const L = partitionLength(pw);
+  if (L < 1e-9 || !(newLen > 0)) return;
+  pw.b = add(pw.a, mul(norm(sub(pw.b, pw.a)), newLen));
+}
 
 export function wallOf(room, i) {
   const a = room.points[i], b = room.points[(i + 1) % room.points.length];
@@ -187,6 +211,16 @@ export function checkPlan(plan) {
         push(a.id, 'error', `Overlaps ${b.name}`);
         push(b.id, 'error', `Overlaps ${a.name}`);
       }
+    }
+  }
+
+  for (const pw of plan.partitions || []) {
+    if (partitionLength(pw) < 1) continue;
+    const outline = partitionOutline(pw);
+    const half = pw.height < partitionCeiling(plan, pw);
+    for (const it of items) {
+      if (it.h <= FLAT_HEIGHT || it.elevation >= pw.height) continue;
+      if (parts.get(it.id).some((p) => convexOverlap(p, outline))) push(it.id, 'error', half ? `Hits the ${pw.height} cm half wall` : 'Goes through an inner wall');
     }
   }
 
@@ -353,7 +387,7 @@ export class Store {
   validateSelection() {
     const s = this.selection;
     if (!s) return;
-    const list = { item: this.plan.items, room: this.plan.rooms, vertex: this.plan.rooms, opening: this.plan.openings }[s.kind];
+    const list = { item: this.plan.items, room: this.plan.rooms, vertex: this.plan.rooms, opening: this.plan.openings, partition: this.plan.partitions }[s.kind];
     if (!list.some((x) => x.id === s.id)) this.selection = null;
   }
 
@@ -362,6 +396,7 @@ export class Store {
     if (!s) return null;
     if (s.kind === 'item') return this.plan.items.find((x) => x.id === s.id);
     if (s.kind === 'opening') return this.plan.openings.find((x) => x.id === s.id);
+    if (s.kind === 'partition') return this.plan.partitions.find((x) => x.id === s.id);
     return this.plan.rooms.find((x) => x.id === s.id);
   }
 }
@@ -369,6 +404,7 @@ export class Store {
 function migrate(plan) {
   if (!plan || !Array.isArray(plan.rooms) || !Array.isArray(plan.items)) throw new Error('Not a RoomFit plan');
   if (!plan.openings) plan.openings = [];
+  if (!Array.isArray(plan.partitions)) plan.partitions = [];
   if (!plan.name) plan.name = 'My apartment';
   for (const r of plan.rooms) if (!r.floor) r.floor = 'plain';
   for (const it of plan.items) {

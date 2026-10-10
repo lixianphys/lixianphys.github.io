@@ -35,6 +35,7 @@
 
     <div class="bar-group secondary">
       <button class="btn" id="tool-draw" aria-pressed="false" title="Draw a room corner by corner (N)">Draw room</button>
+      <button class="btn" id="tool-wall" aria-pressed="false" title="Draw an inner wall or half wall (W)">Inner wall</button>
       <button class="btn" id="tool-measure" aria-pressed="false" title="Measure a distance (M)">Measure</button>
       <button class="btn" id="toggle-snap" aria-pressed="true" title="Snap to 5 cm grid and walls">Snap</button>
       <button class="btn" id="toggle-candidates" aria-pressed="true" title="Show furniture you're considering">Considering</button>
@@ -73,9 +74,17 @@
   <main class="workspace mode-plan" id="workspace">
     <section class="pane" id="plan-pane" aria-label="Floor plan">
       <div class="draw-help" id="draw-help" hidden>
-        <p><b>Drawing a room.</b> Click each corner. Type a length in cm and press <kbd>Enter</kbd> to place the next corner exactly. Click the first corner to finish. <kbd>Backspace</kbd> undoes a corner.</p>
+        <p id="draw-text-room"><b>Drawing a room.</b> Click each corner. Type a length in cm and press <kbd>Enter</kbd> to place the next corner exactly. Click the first corner to finish. <kbd>Backspace</kbd> undoes a corner.</p>
+        <p id="draw-text-wall" hidden><b>Drawing an inner wall.</b> Tap where it starts, then where it ends. For an exact length, type it after the first tap and use an arrow. Ends snap onto walls.</p>
+        <div class="row" id="wall-kind-row" hidden>
+          <label for="wall-kind" class="small">Height</label>
+          <select id="wall-kind">
+            <option value="full">Floor to ceiling</option>
+            <option value="half">Half wall (110 cm)</option>
+          </select>
+        </div>
         <div class="row draw-step">
-          <label for="draw-len" class="small">Next wall</label>
+          <label for="draw-len" class="small" id="draw-len-label">Next wall</label>
           <span class="unit" data-unit="cm"><input id="draw-len" type="number" min="1" step="0.5" inputmode="decimal" placeholder="length"></span>
           <button class="btn icon" data-dir="up" aria-label="Place the next corner up">↑</button>
           <button class="btn icon" data-dir="right" aria-label="Place the next corner right">→</button>
