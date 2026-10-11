@@ -1,8 +1,8 @@
 // Plan data model, derived geometry, fit checks, persistence and undo.
 import {
   add, sub, mul, norm, perp, rotate, len, centroid, pointInPolygon, polygonInside,
-  convexOverlap, signedArea,
-} from './geometry.js?v=d711b78469';
+  convexOverlap, signedArea, clipToConvex, bbox,
+} from './geometry.js?v=6250f90731';
 
 const STORAGE_KEY = 'roomfit:v1';
 // Items this thin (rugs, mats) never collide with anything standing on them.
@@ -164,8 +164,42 @@ export function openingGeom(op, room) {
   return g;
 }
 
-export function roomArea(room) {
-  return Math.abs(signedArea(room.points)) / 10000; // m²
+// Floor (and air) an inner wall takes away from a room, in cm² (cm³). Each wall is clipped
+// to the room, so one on the line between two rooms is split between them; where two walls
+// cross or meet, the overlap is counted once. `weight` is the height to multiply by (1 for area).
+function wallsTaken(room, partitions, weight) {
+  const parts = [];
+  for (const pw of partitions || []) {
+    const outline = partitionOutline(pw);
+    const piece = clipToConvex(room.points, outline);
+    if (piece.length >= 3) parts.push({ outline, piece, box: bbox(outline), w: weight(pw) });
+  }
+  let taken = 0;
+  for (let i = 0; i < parts.length; i++) {
+    const A = parts[i];
+    taken += A.w * Math.abs(signedArea(A.piece));
+    for (let j = i + 1; j < parts.length; j++) {
+      const B = parts[j];
+      if (A.box.maxX < B.box.minX || B.box.maxX < A.box.minX || A.box.maxY < B.box.minY || B.box.maxY < A.box.minY) continue;
+      const both = clipToConvex(A.piece, B.outline);
+      if (both.length >= 3) taken -= Math.min(A.w, B.w) * Math.abs(signedArea(both));
+    }
+  }
+  return taken;
+}
+
+// Floor area in m², less what inner walls (full and half height) stand on.
+export function roomArea(room, partitions) {
+  return Math.max(0, Math.abs(signedArea(room.points)) - wallsTaken(room, partitions, () => 1)) / 10000;
+}
+
+// Floor area inside the room's walls in m², inner walls included.
+export const roomGrossArea = (room) => Math.abs(signedArea(room.points)) / 10000;
+
+// Air volume in m³, less what inner walls fill up to their height.
+export function roomVolume(room, partitions) {
+  const full = Math.abs(signedArea(room.points)) * room.height;
+  return Math.max(0, full - wallsTaken(room, partitions, (pw) => Math.min(pw.height, room.height))) / 1e6;
 }
 
 export function roomAt(plan, pt) {

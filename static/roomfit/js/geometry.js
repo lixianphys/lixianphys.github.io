@@ -29,6 +29,26 @@ export function signedArea(pts) {
   return a / 2;
 }
 
+// Sutherland–Hodgman: the part of polygon `pts` (may be concave) inside the convex polygon
+// `clip`. A concave `pts` can come back with zero-width slivers, but its area is still exact.
+export function clipToConvex(pts, clip) {
+  const s = signedArea(clip) < 0 ? -1 : 1;
+  let out = pts;
+  for (let i = 0; i < clip.length && out.length; i++) {
+    const a = clip[i], e = sub(clip[(i + 1) % clip.length], a);
+    const side = (p) => s * cross(e, sub(p, a));
+    const input = out;
+    out = [];
+    for (let j = 0; j < input.length; j++) {
+      const p = input[j], q = input[(j + 1) % input.length];
+      const dp = side(p), dq = side(q);
+      if (dp >= 0) out.push(p);
+      if ((dp >= 0) !== (dq >= 0)) out.push(add(p, mul(sub(q, p), dp / (dp - dq))));
+    }
+  }
+  return out;
+}
+
 export function centroid(pts) {
   let cx = 0, cy = 0, a = 0;
   for (let i = 0; i < pts.length; i++) {

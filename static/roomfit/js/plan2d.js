@@ -2,11 +2,11 @@
 // live clearance distances for the selected item.
 import {
   add, sub, mul, dist, norm, rotate, snap, closestPointOnSegment, raySegment, edges, bbox, centroid, len,
-} from './geometry.js?v=d711b78469';
+} from './geometry.js?v=6250f90731';
 import {
   itemOutline, wallOf, openingGeom, checkPlan, worstLevel, insertVertex, roomArea, FLAT_HEIGHT,
   partitionOutline, partitionLength, partitionCeiling,
-} from './model.js?v=d711b78469';
+} from './model.js?v=6250f90731';
 
 const NS = 'http://www.w3.org/2000/svg';
 const SNAP_WALL = 8; // cm: items closer than this to a wall snap flush against it
@@ -122,7 +122,7 @@ export class Plan2D {
       const t = el('text', { x: c.x, y: c.y, class: 'room-label', 'font-size': this.px(13) }, gRooms);
       t.textContent = room.name;
       const t2 = el('text', { x: c.x, y: c.y + this.px(15), class: 'room-sub', 'font-size': this.px(11) }, gRooms);
-      t2.textContent = `${roomArea(room).toFixed(1)} m² · ${room.height} cm high`;
+      t2.textContent = `${roomArea(room, plan.partitions).toFixed(1)} m² · ${room.height} cm high`;
     }
 
     // openings
@@ -185,7 +185,7 @@ export class Plan2D {
       // front marker (the +y side in local coordinates is the "front")
       const f1 = add(rotate({ x: -it.w / 2 * 0.6, y: it.d / 2 }, it.rot), it);
       const f2 = add(rotate({ x: it.w / 2 * 0.6, y: it.d / 2 }, it.rot), it);
-      if (it.shape === 'rect') el('line', { x1: f1.x, y1: f1.y, x2: f2.x, y2: f2.y, class: 'front', 'stroke-width': this.px(3) }, grp);
+      if (it.shape === 'rect' && it.h > FLAT_HEIGHT) el('line', { x1: f1.x, y1: f1.y, x2: f2.x, y2: f2.y, class: 'front', 'stroke-width': this.px(3) }, grp);
       const fs = Math.min(this.px(12), Math.min(it.w, it.d) / 3.2);
       const label = el('text', { x: it.x, y: it.y - fs * 0.15, class: 'item-label', 'font-size': fs }, grp);
       label.textContent = it.name;

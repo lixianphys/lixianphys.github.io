@@ -1,12 +1,12 @@
 import {
   Store, defaultPlan, blankPlan, rectRoom, newItem, wallOf, checkPlan, worstLevel, setWallLength,
-  removeVertex, insertVertex, roomArea, roomAt, uid, FLOORS,
+  removeVertex, insertVertex, roomArea, roomGrossArea, roomVolume, roomAt, uid, FLOORS,
   newPartition, partitionLength, partitionCeiling, setPartitionLength, HALF_WALL,
-} from './model.js?v=d711b78469';
-import { CATALOG } from './catalog.js?v=d711b78469';
-import { Plan2D } from './plan2d.js?v=d711b78469';
-import { bbox, snap, centroid, pointInPolygon } from './geometry.js?v=d711b78469';
-import { startSync, saveFile } from './sync.js?v=d711b78469';
+} from './model.js?v=6250f90731';
+import { CATALOG } from './catalog.js?v=6250f90731';
+import { Plan2D } from './plan2d.js?v=6250f90731';
+import { bbox, snap, centroid, pointInPolygon } from './geometry.js?v=6250f90731';
+import { startSync, saveFile } from './sync.js?v=6250f90731';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -35,7 +35,7 @@ const plan2d = new Plan2D($('#plan-pane'), store, {
     const room = { id: uid(), name: `Room ${store.plan.rooms.length + 1}`, height: 250, floor: 'plain', points };
     store.edit((p) => { p.rooms.push(room); p.sample = false; store.selection = { kind: 'room', id: room.id }; });
     setTab('rooms');
-    toast(`${room.name} added: ${roomArea(room).toFixed(1)} m². Rename it and set the ceiling height on the right.`);
+    toast(`${room.name} added: ${roomArea(room, store.plan.partitions).toFixed(1)} m². Rename it and set the ceiling height on the right.`);
     document.getElementById('f-name')?.focus();
   },
   onWallDrawn(a, b) {
@@ -79,7 +79,7 @@ async function setView(mode) {
   document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === mode)));
   if (mode !== 'plan' && !view3d) {
     try {
-      const { View3D } = await import('./view3d.js?v=d711b78469');
+      const { View3D } = await import('./view3d.js?v=6250f90731');
       view3d = new View3D($('#view3d-pane'), store);
       view3d.showCandidates = plan2d.showCandidates;
     } catch (e) {
@@ -307,14 +307,17 @@ function dynamicHtml(target, sel) {
   }
   if (sel.kind === 'room' || sel.kind === 'vertex') {
     const corner = sel.kind === 'vertex' ? ` · corner ${sel.index + 1} is ${Math.round(cornerAngle(target, sel.index))}°` : '';
-    return `<p class="muted small">${roomArea(target).toFixed(2)} m² floor · ${(roomArea(target) * target.height / 100).toFixed(1)} m³ · ${target.points.length} corners${corner}</p>`;
+    const { partitions } = store.plan;
+    const area = roomArea(target, partitions), walls = roomGrossArea(target) - area;
+    const less = walls >= 0.005 ? ` (${walls.toFixed(2)} m² of inner walls taken off)` : '';
+    return `<p class="muted small">${area.toFixed(2)} m² floor${less} · ${roomVolume(target, partitions).toFixed(1)} m³ · ${target.points.length} corners${corner}</p>`;
   }
   return '';
 }
 
 function overviewHtml() {
   const { plan } = store;
-  const area = plan.rooms.reduce((s, r) => s + roomArea(r), 0);
+  const area = plan.rooms.reduce((s, r) => s + roomArea(r, plan.partitions), 0);
   const bad = plan.items.filter((it) => !it.hidden && issues.get(it.id)?.some((i) => i.level !== 'info'));
   const problems = bad.map((it) => {
     const lvl = worstLevel(issues.get(it.id));
@@ -694,7 +697,7 @@ function renderLists() {
     <li><button data-select-room="${r.id}" class="${sel && sel.id === r.id ? 'active' : ''}">
       <span class="swatch" style="background: var(--floor-${r.floor || 'plain'})"></span>
       <span class="name">${esc(r.name)}</span>
-      <span class="meta">${roomArea(r).toFixed(1)} m² · ${r.height}</span>
+      <span class="meta">${roomArea(r, plan.partitions).toFixed(1)} m² · ${r.height}</span>
     </button></li>`).join('') || '<li class="muted small">No rooms yet. Add your first one below.</li>';
 
   $('#partitions-list').innerHTML = plan.partitions.map((pw, i) => {
