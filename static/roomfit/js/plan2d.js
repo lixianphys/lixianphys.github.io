@@ -2,14 +2,15 @@
 // live clearance distances for the selected item.
 import {
   add, sub, mul, dist, norm, rotate, snap, closestPointOnSegment, raySegment, edges, bbox, centroid, len,
-} from './geometry.js?v=6250f90731';
+} from './geometry.js?v=aab60b9078';
 import {
   itemOutline, wallOf, openingGeom, checkPlan, worstLevel, insertVertex, roomArea, FLAT_HEIGHT,
-  partitionOutline, partitionLength, partitionCeiling,
-} from './model.js?v=6250f90731';
+  partitionOutline, partitionLength, partitionCeiling, roomAt,
+} from './model.js?v=aab60b9078';
 
 const NS = 'http://www.w3.org/2000/svg';
 const SNAP_WALL = 8; // cm: items closer than this to a wall snap flush against it
+const SNAP_ANGLE = 3; // degrees: turning an item clicks onto 15° steps and wall directions this close
 
 function el(tag, attrs = {}, parent) {
   const e = document.createElementNS(NS, tag);
@@ -195,7 +196,10 @@ export class Plan2D {
 
     if (sel?.kind === 'item') {
       const it = plan.items.find((x) => x.id === sel.id);
-      if (it && !it.hidden) this.renderClearances(it);
+      if (it && !it.hidden) {
+        this.renderClearances(it);
+        this.renderRotateHandle(it);
+      }
     }
     if (sel?.kind === 'partition') {
       const pw = plan.partitions.find((x) => x.id === sel.id);
@@ -311,6 +315,44 @@ export class Plan2D {
       const t = el('text', { x: mid.x, y: mid.y, 'font-size': this.px(11) }, g);
       t.textContent = txt;
     }
+  }
+
+  // A knob behind the item (opposite its front): drag it to turn the item to any angle.
+  renderRotateHandle(it) {
+    const g = el('g', { class: 'rot-handle', 'data-rot': it.id }, this.svg);
+    const back = add(rotate({ x: 0, y: -it.d / 2 }, it.rot), it);
+    const knob = add(rotate({ x: 0, y: -it.d / 2 - this.px(26) }, it.rot), it);
+    el('line', { x1: back.x, y1: back.y, x2: knob.x, y2: knob.y, 'stroke-width': this.px(1.5) }, g);
+    el('circle', { cx: knob.x, cy: knob.y, r: this.px(18), class: 'hit' }, g);
+    el('circle', { cx: knob.x, cy: knob.y, r: this.px(7), 'stroke-width': this.px(2) }, g);
+    if (this.drag?.kind === 'rot') {
+      const txt = `${Math.round(it.rot * 10) / 10}°`;
+      const bw = this.px(10 + txt.length * 7), bh = this.px(17);
+      const pos = add(rotate({ x: 0, y: -it.d / 2 - this.px(52) }, it.rot), it);
+      el('rect', { x: pos.x - bw / 2, y: pos.y - bh / 2, width: bw, height: bh, rx: this.px(4) }, g);
+      el('text', { x: pos.x, y: pos.y, 'font-size': this.px(11) }, g).textContent = txt;
+    }
+  }
+
+  // Angle (degrees) for an item turned by hand: clicks onto multiples of 15° and onto the
+  // directions of the walls of the room it stands in when within SNAP_ANGLE.
+  snapAngle(it, deg) {
+    const targets = [];
+    for (let a = 0; a < 360; a += 15) targets.push(a);
+    const room = roomAt(this.store.plan, it);
+    if (room) {
+      room.points.forEach((_, i) => {
+        const w = wallOf(room, i);
+        const a = (Math.atan2(w.dir.y, w.dir.x) * 180) / Math.PI;
+        for (let k = 0; k < 4; k++) targets.push(a + k * 90);
+      });
+    }
+    let best = null;
+    for (const t of targets) {
+      const diff = Math.abs((((deg - t) % 360) + 540) % 360 - 180);
+      if (diff < SNAP_ANGLE && (!best || diff < best.diff)) best = { diff, t };
+    }
+    return best ? best.t : Math.round(deg);
   }
 
   renderMeasure() {
@@ -459,8 +501,9 @@ export class Plan2D {
 
   // ---------- interaction ----------
   hit(e) {
-    const t = e.target.closest('[data-pend],[data-vertex],[data-mid],[data-wall],[data-opening],[data-item],[data-partition],[data-room]');
+    const t = e.target.closest('[data-rot],[data-pend],[data-vertex],[data-mid],[data-wall],[data-opening],[data-item],[data-partition],[data-room]');
     if (!t) return null;
+    if (t.dataset.rot) return { kind: 'rot', id: t.dataset.rot };
     if (t.dataset.pend !== undefined) return { kind: 'pend', id: t.dataset.partition, index: +t.dataset.pend };
     if (t.dataset.partition) return { kind: 'partition', id: t.dataset.partition };
     if (t.dataset.mid !== undefined) return { kind: 'mid', id: t.dataset.room, index: +t.dataset.mid };
@@ -502,7 +545,7 @@ export class Plan2D {
 
     const h = this.hit(e);
     // with the layout locked, touching a room, wall, door or window just pans the view
-    const fixed = this.locked && h && h.kind !== 'item';
+    const fixed = this.locked && h && h.kind !== 'item' && h.kind !== 'rot';
     if (e.button === 1 || e.button === 2 || !h || fixed || e.shiftKey) {
       if ((!h || fixed) && e.button === 0) store.select(null);
       this.drag = { kind: 'pan', start: { x: e.clientX, y: e.clientY }, view0: { ...this.view } };
@@ -522,6 +565,10 @@ export class Plan2D {
       insertVertex(plan, room, h.index, this.snapPt(mul(add(w.a, w.b), 0.5)));
       store.selection = { kind: 'vertex', id: room.id, index: h.index + 1 };
       this.drag = { kind: 'vertex', room, index: h.index + 1, moved: true };
+    } else if (h.kind === 'rot') {
+      const it = plan.items.find((x) => x.id === h.id);
+      const a0 = (Math.atan2(p.y - it.y, p.x - it.x) * 180) / Math.PI;
+      this.drag = { kind: 'rot', target: it, a0, rot0: it.rot, moved: false };
     } else if (h.kind === 'item') {
       const it = plan.items.find((x) => x.id === h.id);
       store.selection = { kind: 'item', id: it.id };
@@ -587,7 +634,15 @@ export class Plan2D {
       return;
     }
     d.moved = true;
-    if (d.kind === 'item') {
+    if (d.kind === 'rot') {
+      const it = d.target;
+      const a = (Math.atan2(p.y - it.y, p.x - it.x) * 180) / Math.PI;
+      let deg = d.rot0 + a - d.a0;
+      // Alt turns freely, to a tenth of a degree
+      deg = this.snapOn && !e.altKey ? this.snapAngle(it, deg) : Math.round(deg * 10) / 10;
+      // hundredths keep a wall-aligned angle (e.g. 33.69°) flush to well under a millimetre
+      it.rot = (Math.round((((deg % 360) + 360) % 360) * 100) / 100) % 360;
+    } else if (d.kind === 'item') {
       const it = d.target;
       const np = this.snapPt(sub(p, d.grab));
       it.x = np.x; it.y = np.y;

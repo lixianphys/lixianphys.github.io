@@ -4,8 +4,8 @@
 // needed; import maps only arrived in Safari 16.4.
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/+esm';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js/+esm';
-import { sub, dot, len, bbox } from './geometry.js?v=6250f90731';
-import { wallOf, openingGeom, checkPlan, worstLevel, partitionLength } from './model.js?v=6250f90731';
+import { sub, dot, len, bbox } from './geometry.js?v=aab60b9078';
+import { wallOf, openingGeom, checkPlan, worstLevel, partitionLength } from './model.js?v=aab60b9078';
 
 const WALL_T = 10;
 

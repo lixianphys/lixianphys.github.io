@@ -2,7 +2,7 @@
 import {
   add, sub, mul, norm, perp, rotate, len, centroid, pointInPolygon, polygonInside,
   convexOverlap, signedArea, clipToConvex, bbox,
-} from './geometry.js?v=6250f90731';
+} from './geometry.js?v=aab60b9078';
 
 const STORAGE_KEY = 'roomfit:v1';
 // Items this thin (rugs, mats) never collide with anything standing on them.

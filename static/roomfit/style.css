@@ -216,6 +216,12 @@ fieldset.plain { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; 
 .item.lvl-warn polygon { stroke: var(--warn); stroke-dasharray: none; }
 .item.lvl-info polygon { stroke: var(--info); }
 .item.selected polygon { filter: drop-shadow(0 0 3px var(--tape)) drop-shadow(0 0 1px var(--tape)); }
+.rot-handle { cursor: grab; }
+.rot-handle line { stroke: var(--tape); }
+.rot-handle circle { fill: var(--surface); stroke: var(--tape); }
+.rot-handle circle.hit { fill: transparent; stroke: none; }
+.rot-handle rect { fill: var(--tape); }
+.rot-handle text { fill: var(--tape-ink); font-family: var(--font-mono); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .item .front { stroke: var(--on-item); opacity: 0.45; }
 .item-label { fill: var(--on-item); font-family: var(--font-body); font-weight: 600; text-anchor: middle; pointer-events: none; }
 .item-sub { fill: var(--on-item); font-family: var(--font-mono); text-anchor: middle; pointer-events: none; opacity: 0.75; }

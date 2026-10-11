@@ -32,6 +32,9 @@ export const CATALOG = [
   { group: 'Kitchen & bath', name: 'Kitchen unit 60', w: 60, d: 60, h: 90, color: '#e2ddd3' },
   { group: 'Kitchen & bath', name: 'Bathtub 170×75', w: 170, d: 75, h: 60, color: '#eef1f4' },
   { group: 'Kitchen & bath', name: 'Bathtub 180×80', w: 180, d: 80, h: 60, color: '#eef1f4' },
+  { group: 'Kitchen & bath', name: 'Shower 90×90', w: 90, d: 90, h: 200, color: '#d6e4ea' },
+  { group: 'Kitchen & bath', name: 'Shower 80×120', w: 120, d: 80, h: 200, color: '#d6e4ea' },
+  { group: 'Kitchen & bath', name: 'Toilet', w: 38, d: 65, h: 80, color: '#eef1f4' },
   { group: 'Kitchen & bath', name: 'Wall cabinet 60', w: 60, d: 35, h: 70, elevation: 145, color: '#e2ddd3' },
 
   // flat (h ≤ 3 cm): furniture may stand on them, but they still have to fit inside the room

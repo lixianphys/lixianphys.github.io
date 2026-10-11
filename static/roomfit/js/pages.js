@@ -3,9 +3,9 @@
 // only the password. Everything stored or synced is encrypted with a key derived from it.
 import {
   ITERATIONS, newSalt, deriveKey, seal, unseal, readVault, writeVault, forgetVault, encryptedStorage,
-} from './vault.js?v=6250f90731';
-import { findGist, readGist, createGist, writeGist, sealPlan, openPlan, gistSync } from './gist.js?v=6250f90731';
-import { defaultPlan } from './model.js?v=6250f90731';
+} from './vault.js?v=aab60b9078';
+import { findGist, readGist, createGist, writeGist, sealPlan, openPlan, gistSync } from './gist.js?v=aab60b9078';
+import { defaultPlan } from './model.js?v=aab60b9078';
 
 window.__roomfitStarted = true; // the lock screen counts as started for the boot check
 
@@ -146,7 +146,7 @@ async function start({ vault: v, key, token, plan }) {
     else if (hiddenAt && Date.now() - hiddenAt > AUTO_LOCK_MS) location.reload();
   });
   try {
-    await import('./main.js?v=6250f90731');
+    await import('./main.js?v=aab60b9078');
   } catch (e) {
     document.body.insertAdjacentHTML('beforeend', `<div class="boot-error"><h2>RoomFit couldn't start</h2><pre>${esc(e?.message || e)}</pre></div>`);
   }

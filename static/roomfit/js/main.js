@@ -2,11 +2,11 @@ import {
   Store, defaultPlan, blankPlan, rectRoom, newItem, wallOf, checkPlan, worstLevel, setWallLength,
   removeVertex, insertVertex, roomArea, roomGrossArea, roomVolume, roomAt, uid, FLOORS,
   newPartition, partitionLength, partitionCeiling, setPartitionLength, HALF_WALL,
-} from './model.js?v=6250f90731';
-import { CATALOG } from './catalog.js?v=6250f90731';
-import { Plan2D } from './plan2d.js?v=6250f90731';
-import { bbox, snap, centroid, pointInPolygon } from './geometry.js?v=6250f90731';
-import { startSync, saveFile } from './sync.js?v=6250f90731';
+} from './model.js?v=aab60b9078';
+import { CATALOG } from './catalog.js?v=aab60b9078';
+import { Plan2D } from './plan2d.js?v=aab60b9078';
+import { bbox, snap, centroid, pointInPolygon } from './geometry.js?v=aab60b9078';
+import { startSync, saveFile } from './sync.js?v=aab60b9078';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -79,7 +79,7 @@ async function setView(mode) {
   document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === mode)));
   if (mode !== 'plan' && !view3d) {
     try {
-      const { View3D } = await import('./view3d.js?v=6250f90731');
+      const { View3D } = await import('./view3d.js?v=aab60b9078');
       view3d = new View3D($('#view3d-pane'), store);
       view3d.showCandidates = plan2d.showCandidates;
     } catch (e) {
@@ -353,12 +353,14 @@ function itemHtml(it) {
       ${f(NUM('h', 'Height', 'cm', { min: 0 }))}
       ${f({ k: 'shape', label: 'Shape', type: 'select', options: [['rect', 'Rectangle'], ['ellipse', 'Round / oval'], ['L', 'Corner (L)']] })}
       ${f(NUM('elevation', 'Off floor', 'cm'))}
-      ${f(NUM('rot', 'Rotation', '°', { step: 5, min: -360 }))}
+      ${f(NUM('rot', 'Rotation', '°', { step: 'any', min: -360 }))}
       ${L ? f(NUM('lw', 'Chaise width', 'cm', { min: 1 })) + f(NUM('ld', 'Seat depth', 'cm', { min: 1 })) + f({ k: 'mirror', label: 'Mirror', type: 'checkbox' }) : ''}
     </div>
     <div class="row">
       <button class="btn" data-action="rot-left" title="Rotate left (Shift+R)">⟲ 90°</button>
       <button class="btn" data-action="rot-right" title="Rotate right (R)">⟳ 90°</button>
+      <button class="btn" data-action="rot-left-15" title="Rotate left 15° ([, Shift for 1°)">⟲ 15°</button>
+      <button class="btn" data-action="rot-right-15" title="Rotate right 15° (], Shift for 1°)">⟳ 15°</button>
       <button class="btn" data-action="duplicate">Duplicate</button>
       <button class="btn danger" data-action="delete">Remove</button>
     </div>
@@ -535,6 +537,8 @@ function runAction(action, btn) {
       break;
     case 'rot-left': rotateSelected(-90); break;
     case 'rot-right': rotateSelected(90); break;
+    case 'rot-left-15': rotateSelected(-15); break;
+    case 'rot-right-15': rotateSelected(15); break;
     case 'duplicate': duplicateSelected(); break;
     case 'delete': case 'delete-opening': deleteSelected(); break;
     case 'delete-room':
@@ -602,7 +606,8 @@ function longestWall(room) {
 function rotateSelected(deg) {
   const it = store.selection?.kind === 'item' ? store.selected : null;
   if (!it) return;
-  store.edit(() => { it.rot = (((Math.round(it.rot / 90) * 90 + deg) % 360) + 360) % 360; });
+  // turns by `deg` from wherever it stands, so an item set at 33° goes to 123°
+  store.edit(() => { it.rot = (Math.round((((it.rot + deg) % 360) + 360) % 360 * 100) / 100) % 360; });
 }
 function duplicateSelected() {
   const it = store.selection?.kind === 'item' ? store.selected : null;
@@ -786,6 +791,8 @@ document.addEventListener('keydown', (e) => {
       break;
     case 'Delete': case 'Backspace': e.preventDefault(); deleteSelected(); break;
     case 'r': case 'R': rotateSelected(e.shiftKey ? -90 : 90); break;
+    case '[': case '{': rotateSelected(e.shiftKey ? -1 : -15); break;
+    case ']': case '}': rotateSelected(e.shiftKey ? 1 : 15); break;
     case 'm': case 'M': setMeasure(plan2d.tool !== 'measure'); break;
     case 'n': case 'N': setDraw(plan2d.tool !== 'draw'); break;
     case 'w': case 'W': setDraw(plan2d.tool !== 'wall', 'wall'); break;
